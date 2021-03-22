@@ -1,0 +1,82 @@
+---
+title: "CARS - Report"
+author: "Ale F. Benages"
+date: "3/22/2021"
+output: html_document
+---
+
+
+```{r}
+print('a')
+
+
+
+```
+
+
+# 1 Description of the dataset
+ 
+* Consists on 3 columns (‘Name of cars’, ‘Speed” and “Distance”), and 50 rows of records.  
+* No Missing values.   
+
+## 1.1 Variable: ‘Name of cars’  
+* Nominal Categorical Variable.   
+* Holds the different brands of cars. 
+
+## 1.2 Variable: ‘Speed’
+* Numerical variable
+* As I didn’t have any extra information about the dataset, I assumed that this variables represent the speed of cars, and it’s units are Mph ( a max velocity of 25kmh is quite low, but 25 mph is more acceptable, around 40kmh). 
+* This graph summarizes the numerical values of this variable: 
+
+```{r}
+summary(speed)
+```
+
+Speed
+Min.   : 4.0   
+1st Qu.:12.0   
+Median :15.0   
+Mean   :15.4  
+3rd Qu.:19.0   
+Max.   :25.0   
+
+The most frequent speed of those cars are between 12 to 19 mph. And the average speed is 15.4 mph. 
+
+
+    • ‘Distance’, Numerical Variable. 
+        ◦ I assumed that this variable represents the stopping distance, and that the measuring unit is feet. (also those values have more sense in feet than meters because a stopping distance of 120m is quite exaggerated, but in feet it’s a safer distance of almost 37 meters) 
+        ◦ This graph summarizes the numerical values of this variable. 
+Distance       
+Min.   :  2.00  
+1st Qu.: 26.00  
+Median : 36.00  
+Mean   : 42.98  
+3rd Qu.: 56.00  
+Max.   :120.00  
+
+The typical stopping distance of those cars are between 26 to 56 feet. And the average is 43 feet.
+There is one car that has an exaggerated stopping distance of 120 feet.  
+
+
+Useful information comes from plotting both variables together. There is a clear positive correlation  between them. This correlation confirms the assumption about the units and description of the variables: as faster a car goes, more distance will be needed to stop it.
+
+
+
+
+Prediction
+The dataset was divided in train/test set with a rate of 70/30.  And then a linear regression model was applied to achieve the goal of the analysis: predict the car stopping distance, based on tits speed.
+    • Independent Variable: Speed of the cars (speed)
+    • Dependent Variable: Stopping distances (distance)
+And this data fits into the linear regression as:   Distance = slope*speed + y_intercept 
+With the results, the equation of the model changes to   Distance = 3.582*speed – 13.082
+
+
+Conclusion
+A detailed output could be found in the output of the script. To summarize, I will focus on the result of the R2, as this statistic provides a measure of how well the model fits the data. Those values lie between 0 and 1 (where 0 represents a regression that does not explain the relation of the variables at all, and 1 corresponds to a full and perfect correlation). In our case we got a Multiple R-squared of 0.603. Our rough 60% of the changes in the response variable (Stopping Distance) could be explained by the predictor variable (Speed). And it also makes sense, there are a lot of metrics that could be chosen to define the stopping distance: type of brakes, type of tires, wet/dry surface, driver’s attention level, etc. But in this case I discovered that, based on the info provided, just using a single independent variable, with a simple linear model, I was able to explain quite well the changes in the dependent variable. 
+
+
+
+
+
+
+

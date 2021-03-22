@@ -1,0 +1,183 @@
+---
+title: "Iris Analysis"
+author: "Ale F. Benages"
+date: "3/22/2021"
+output: html_document
+---
+
+
+# Libraries
+```{r}
+#install.packages('tidyverse')
+#install.packages(readr)
+library("readr")
+library(ggplot2)
+```
+
+# Load CSV
+```{r}
+IrisDataset <- read.csv('iris.csv')
+```
+
+# 1. EDA 
+## 1.1 Knowing your data
+```{r}
+# To list the attributes of the data set.
+attributes(IrisDataset)
+# To print the min, max, mean, median, and quartiles of each attribute.
+summary(IrisDataset)
+# To display the structure of your data set.
+str(IrisDataset) 
+# To get th names of the attributes within your data set.
+names(IrisDataset) 
+```
+
+As the analysis goal is about the relationship between the Petal Length and Petal Width, let's analyze those variables detailed
+```{r}
+# specific info about the Petal.Lenght 
+summary(IrisDataset$Petal.Length)
+# specific info about the Petal.Width 
+summary(IrisDataset$Petal.Width)
+```
+
+
+
+## 1.2 Missing Values?
+If there are, the summarye() will count how many NA’s you have.
+```{r}
+summary(IrisDataset)
+```
+
+Also you can show your NA’s through logical data. (TRUE if it’s missing, FALSE if it’s not.)
+
+```{r}
+is.na(IrisDataset) 
+```
+
+Replace the missing values with the mean, which is common technique, but **something to use with care with as it can skew the data**.
+```{r}
+#DatasetName$ColumnName[is.na(DatasetName$ColumnName)]<-mean(DatasetName$ColumnName,na.rm = TRUE)
+```
+
+## 1.3 Some Plots
+### PETAL'S LENGTH
+
+```{r}
+hist(IrisDataset$Petal.Length, 
+     main="Sepal Length distribution", xlab="Lenght [mm]", 
+     col='green')
+```
+
+
+```{r}
+#' boxplot
+ggplot(data = IrisDataset, aes(x = "", y = Petal.Length)) + 
+  geom_boxplot() + theme_classic()+ 
+  xlab("")+ylab("Petal Lenght [mm]")
+```
+
+In this case, Boxplot it's not being very descriptive, let's try a Violinplot:
+
+```{r}
+#' violinplot
+ggplot(data = IrisDataset, aes(x = "", y = Petal.Length)) + 
+  geom_violin() + theme_classic()+ 
+  xlab("")+ylab("Petal Lenght [mm]")+ 
+  geom_boxplot(width=0.1)+ 
+  stat_summary(fun=median, geom="point", size=2, color="red")
+```
+
+### PETAL'S WIDTH
+
+```{r}
+hist(IrisDataset$Petal.Width, 
+     main="Sepal Length distribution", xlab="Lenght [mm]", 
+     col='violet')
+```
+
+
+```{r}
+#' boxplot
+ggplot(data = IrisDataset, aes(x = "", y = Petal.Width)) + 
+  geom_boxplot() + theme_classic()+ 
+  xlab("")+ylab("Petal Lenght [mm]")
+```
+
+
+```{r}
+#' violinplot
+ggplot(data = IrisDataset, aes(x = "", y = Petal.Width)) + 
+  geom_violin() + theme_classic()+ 
+  xlab("")+ylab("Petal Lenght [mm]")+ 
+  geom_boxplot(width=0.1)+ 
+  stat_summary(fun=median, geom="point", size=2, color="red")
+```
+
+
+### Petal's Length vs Petal's Width
+```{r}
+ggplot(data = IrisDataset, aes(x = Petal.Length  , y = Petal.Width))  + 
+  geom_point(shape = 1) + 
+  xlab("Petal Lenght [mm]")+ylab("Petal Width [mm]") +
+  theme_bw()
+```
+
+There is a positive correlation between those variables. 
+
+
+
+
+# 2. Testing and Training Sets
+
+First of all, define a seed to get *reproducible experiments*. 
+```{r}
+set.seed(122)
+```
+
+These two lines calculate the sizes of each set **but do not create** the sets:
+```{r}
+trainSize<-round(nrow(IrisDataset)*0.8) # 80/20%
+testSize<-nrow(IrisDataset)-trainSize
+```
+
+Just to check the dimension of the empty vectors.
+```{r}
+print(trainSize)
+print(testSize)
+```
+
+
+So, how do you create the **train/test sets**?. We also want these sets to be in a randomized order, which will help to create an optimal model. To perform this, you need to run these three lines of code. 
+```{r}
+training_indices<-sample(seq_len(nrow(IrisDataset)),size =trainSize)
+trainSet<-IrisDataset[training_indices,]
+testSet <-IrisDataset[-training_indices,]
+```
+
+
+# 3. Linear Regression 
+The next step is to construct a model to answer the business question: petal's length using the petal’s width. 
+
+* **Input / Independent Variable / Y **: petal’s width
+* **Output / Dependent Variable / X **: petal's length
+
+To do this, we’ll be using the prediction function – predict() to get a **first grade** equation that fit's the data. 
+
+```{r}
+# The basic line of code for the linear model function. 
+LinearModel<- lm(Petal.Width ~ Petal.Length, trainSet )
+```
+
+thats all!. Now to see the metrics of the model, just call **summary()**
+```{r}
+summary(LinearModel)
+```
+
+
+## 3.1 Predictions
+
+To make predictions, we use the **Test Set**.
+```{r}
+prediction <- predict(LinearModel, testSet)
+prediction
+```
