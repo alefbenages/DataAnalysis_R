@@ -1,0 +1,1370 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Introduction to R},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Introduction to R}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{r-markdown}{%
+\subsection{R Markdown}\label{r-markdown}}
+
+R is an object-oriented language: everything in R is an object.
+
+\hypertarget{r-has-6-basic-data-types}{%
+\subparagraph{R has 6 basic data
+types:}\label{r-has-6-basic-data-types}}
+
+\begin{itemize}
+\item
+  character
+
+  : ``a'', ``ciao''
+\item
+  numeric
+
+  : 2, 15.5
+\item
+  integer
+
+  : 2L (the L tells R to store this as an integer)
+\item
+  logical
+
+  : TRUE, FALSE (aka boolean)
+\item
+  complex
+
+  : 1+4i (complex numbers with real and imaginary parts)
+\end{itemize}
+
+\emph{Atomic} means that the vector only holds data of a single data
+type.
+
+\hypertarget{examining-objects}{%
+\subparagraph{Examining objects}\label{examining-objects}}
+
+R provides many functions to examine features of vectors and objects in
+general, eg:
+
+\begin{itemize}
+\tightlist
+\item
+  class() - what kind of object is it (high-level)?
+\item
+  typeof() - what is the object's data type (low-level)?
+\item
+  length() - how long is it? What about two dimensional objects?
+\item
+  attributes() - does it have any metadata?
+\end{itemize}
+
+Example
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}} \StringTok{"Hola"}
+\FunctionTok{typeof}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "character"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{attributes}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{s }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}
+\NormalTok{s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{length}\NormalTok{(s)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(s)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#convert to numeric}
+\NormalTok{num\_s }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(s)}
+\NormalTok{num\_s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(num\_s)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "double"
+\end{verbatim}
+
+\hypertarget{data-structures}{%
+\subsection{Data structures}\label{data-structures}}
+
+R has many data structures. The main ones are the following:
+
+\begin{itemize}
+\tightlist
+\item
+  atomic vector
+\item
+  list
+\item
+  matrix
+\item
+  data frame
+\item
+  factors
+\item
+  time series
+\end{itemize}
+
+\hypertarget{vectors}{%
+\subsubsection{Vectors}\label{vectors}}
+
+The most common and basic data structure in R. Vectors can be one of two
+types:
+
+\begin{itemize}
+\tightlist
+\item
+  atomic vectors\\
+\item
+  lists
+\end{itemize}
+
+In general the term \emph{vector} is used in reference to the atomic
+types only.
+
+A vector is a collection of elements usually of mode: character,
+logical, integer or numeric. it is a one-dimensional data structure and
+it is homogeneous, i.e.~each element is of the same type.
+
+\hypertarget{create-a-vector}{%
+\subparagraph{Create a vector}\label{create-a-vector}}
+
+To create an empty vector use vector(). The default mode is logical. You
+can be more explicit (as shown in the examples below.) It is more common
+to use direct constructors such as character(), numeric(), etc.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{vector}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## logical(0)
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# a vector of mode \textquotesingle{}character\textquotesingle{} composed of 5 elements}
+\FunctionTok{vector}\NormalTok{(}\StringTok{"character"}\NormalTok{, }\AttributeTok{length =} \DecValTok{5}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "" "" "" "" ""
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# same same, but using only the constructor directly.}
+\FunctionTok{character}\NormalTok{(}\DecValTok{5}\NormalTok{) }\CommentTok{\# a \textquotesingle{}character\textquotesingle{} vector composed of 5 elements}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "" "" "" "" ""
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{numeric}\NormalTok{(}\DecValTok{5}\NormalTok{)   }\CommentTok{\# a \textquotesingle{}numeric\textquotesingle{} vector with 5 elements}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0 0 0 0 0
+\end{verbatim}
+
+One can create a vector directly specifying their content. R will guess
+the appropriate mode of storage.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# this will be treated as double precision real numbers}
+\NormalTok{v }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{)}
+\CommentTok{\# to force treating as integer numbers}
+\NormalTok{v\_num }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(1L, 2L, 3L)}
+\CommentTok{\# to force treating as integer numbers it can be casted as well}
+\NormalTok{v }\OtherTok{\textless{}{-}} \FunctionTok{as.integer}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{))}
+
+\CommentTok{\#create a vector of mode logical}
+\NormalTok{y }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{)}
+
+\CommentTok{\#create a vectore of mode character}
+\NormalTok{z }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Fabi"}\NormalTok{, }\StringTok{"Oriol"}\NormalTok{, }\StringTok{"Alessandro"}\NormalTok{, }\StringTok{"Jasper"}\NormalTok{, }\StringTok{"Alex"}\NormalTok{, }\StringTok{"David"}\NormalTok{, }\StringTok{"Alejandro"}\NormalTok{, }\StringTok{"Laura"}\NormalTok{, }\StringTok{"Jasper"}\NormalTok{, }\StringTok{"Kevin"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{examining-vectors}{%
+\subparagraph{Examining vectors}\label{examining-vectors}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(v)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{length}\NormalTok{(v)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(v)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(v)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  int [1:3] 1 2 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "character"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{length}\NormalTok{(z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "character"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(z)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  chr [1:10] "Fabi" "Oriol" "Alessandro" "Jasper" "Alex" "David" "Alejandro" ...
+\end{verbatim}
+
+\hypertarget{adding-elements-to-a-vector}{%
+\subparagraph{Adding elements to a
+vector}\label{adding-elements-to-a-vector}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#add elements one by one}
+\NormalTok{en\_z }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(z, }\StringTok{"Kevin"}\NormalTok{)}
+\NormalTok{en\_z }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(z, }\StringTok{"Ariadna"}\NormalTok{)}
+\NormalTok{en\_z}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "Fabi"       "Oriol"      "Alessandro" "Jasper"     "Alex"      
+##  [6] "David"      "Alejandro"  "Laura"      "Jasper"     "Kevin"     
+## [11] "Ariadna"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#add two elements at the same time basically concatenating vectors}
+\NormalTok{En\_z }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(z, }\FunctionTok{c}\NormalTok{(}\StringTok{"Kevin"}\NormalTok{, }\StringTok{"Ariadna"}\NormalTok{))}
+\NormalTok{En\_z}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1] "Fabi"       "Oriol"      "Alessandro" "Jasper"     "Alex"      
+##  [6] "David"      "Alejandro"  "Laura"      "Jasper"     "Kevin"     
+## [11] "Kevin"      "Ariadna"
+\end{verbatim}
+
+\hypertarget{create-vectors-from-sequences}{%
+\subparagraph{Create Vectors from
+Sequences}\label{create-vectors-from-sequences}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#sequence of numbers}
+\NormalTok{int\_series }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}
+\NormalTok{int\_series}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{series }\OtherTok{\textless{}{-}} \FloatTok{1.5}\SpecialCharTok{:}\FloatTok{5.5}
+\NormalTok{series}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.5 2.5 3.5 4.5 5.5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#same same}
+\FunctionTok{seq}\NormalTok{(}\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  [1]  1  2  3  4  5  6  7  8  9 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{seq}\NormalTok{(}\AttributeTok{from =} \DecValTok{1}\NormalTok{, }\AttributeTok{to =} \DecValTok{5}\NormalTok{, }\AttributeTok{by =} \FloatTok{0.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0
+\end{verbatim}
+
+\hypertarget{selecting-elements}{%
+\subparagraph{Selecting elements}\label{selecting-elements}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#sequence of numbers}
+\NormalTok{int\_series }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}
+\NormalTok{int\_series[}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{,}\DecValTok{5}\NormalTok{)]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 5
+\end{verbatim}
+
+\hypertarget{special-values}{%
+\subparagraph{Special values}\label{special-values}}
+
+\textbf{NA} = Not Available
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FloatTok{0.5}\NormalTok{, }\ConstantTok{NA}\NormalTok{, }\FloatTok{0.7}\NormalTok{)}
+\CommentTok{\#check if there are NA elements one by one}
+\FunctionTok{is.na}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] FALSE  TRUE FALSE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#check if there is any NA element}
+\FunctionTok{anyNA}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+\textbf{Inf} = infinite
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{4}\SpecialCharTok{/}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] Inf
+\end{verbatim}
+
+\textbf{NaN} = Not a Number = undefined value.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{0}\SpecialCharTok{/}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NaN
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ConstantTok{Inf}\SpecialCharTok{/}\ConstantTok{Inf}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NaN
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ConstantTok{Inf}\SpecialCharTok{/}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] Inf
+\end{verbatim}
+
+\hypertarget{vectors-with-mixed-types-elements}{%
+\subparagraph{Vectors with mixed types
+elements}\label{vectors-with-mixed-types-elements}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#r automatically converts to a single type}
+\NormalTok{m1 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FloatTok{1.7}\NormalTok{, }\StringTok{"a"}\NormalTok{)}
+\NormalTok{m1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "1.7" "a"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m2 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\ConstantTok{TRUE}\NormalTok{, }\DecValTok{2}\NormalTok{)}
+\NormalTok{m2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m3 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\ConstantTok{FALSE}\NormalTok{, }\DecValTok{3}\NormalTok{)}
+\NormalTok{m3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m4 }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"a"}\NormalTok{, }\ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{m4}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "a"    "TRUE"
+\end{verbatim}
+
+\hypertarget{matrices}{%
+\subsubsection{Matrices}\label{matrices}}
+
+Multi dimensional atomic vectors, as such they are homogeneous
+structures containing just one data type. Generally 2 dimensions: rows
+and columns.
+
+\hypertarget{create-a-matrix}{%
+\subparagraph{Create a matrix}\label{create-a-matrix}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\AttributeTok{nrow =} \DecValTok{3}\NormalTok{, }\AttributeTok{ncol =} \DecValTok{4}\NormalTok{)}
+\NormalTok{m}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4]
+## [1,]   NA   NA   NA   NA
+## [2,]   NA   NA   NA   NA
+## [3,]   NA   NA   NA   NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#print dimensions nrows and ncols}
+\FunctionTok{dim}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3 4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#high level type}
+\FunctionTok{class}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "matrix"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#low level type}
+\FunctionTok{typeof}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "logical"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{))}
+\NormalTok{m}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1]
+## [1,]    1
+## [2,]    3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#print dimensions nrows and ncols}
+\FunctionTok{dim}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2 1
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#high level type}
+\FunctionTok{class}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "matrix"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#low level type}
+\FunctionTok{typeof}\NormalTok{(m)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "double"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mq }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}
+  \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{3}\NormalTok{),}
+  \AttributeTok{nrow =} \DecValTok{2}\NormalTok{,}
+  \AttributeTok{ncol =} \DecValTok{6}\NormalTok{)}
+\NormalTok{mq}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4] [,5] [,6]
+## [1,]    1    2    1    2    1    2
+## [2,]    1    3    1    3    1    3
+\end{verbatim}
+
+Matrices are filled columns wise.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{m }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\DecValTok{6}\NormalTok{, }\AttributeTok{nrow =} \DecValTok{2}\NormalTok{, }\AttributeTok{ncol =} \DecValTok{3}\NormalTok{)}
+\NormalTok{m}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+\end{verbatim}
+
+\hypertarget{select-matrix-elements}{%
+\subparagraph{Select matrix elements}\label{select-matrix-elements}}
+
+To reference a matrix element: specify the index along each dimension in
+single square brackets, e.g.~m{[}row\_index, column\_index{]}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mq[}\DecValTok{1}\NormalTok{,}\DecValTok{4}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 2
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mq[}\DecValTok{2}\NormalTok{,}\DecValTok{4}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(mq[}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{]) }\SpecialCharTok{==} \FunctionTok{typeof}\NormalTok{(mq)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mq[}\DecValTok{9}\NormalTok{] }\CommentTok{\#this selects the ninth element column{-}wise}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1
+\end{verbatim}
+
+\hypertarget{create-a-matrix-from-a-vector}{%
+\subparagraph{Create a matrix from a
+vector}\label{create-a-matrix-from-a-vector}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{v }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{10}
+\CommentTok{\#assigning dimension to the matrix}
+\FunctionTok{dim}\NormalTok{(v) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{) }
+\CommentTok{\#dim(v) \textless{}{-} c(5, 2) }
+\NormalTok{v}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      [,1] [,2] [,3] [,4] [,5]
+## [1,]    1    3    5    7    9
+## [2,]    2    4    6    8   10
+\end{verbatim}
+
+\hypertarget{create-a-matrix-binding-rows-or-columns}{%
+\subparagraph{Create a matrix binding rows or
+columns}\label{create-a-matrix-binding-rows-or-columns}}
+
+\begin{itemize}
+\tightlist
+\item
+  rbind() to bind rows\\
+\item
+  cbind() to bind columns
+\end{itemize}
+
+NB Dimesions must match!
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{c1 }\OtherTok{\textless{}{-}} \DecValTok{3}\SpecialCharTok{:}\DecValTok{6}
+\NormalTok{c2 }\OtherTok{\textless{}{-}} \DecValTok{5}\SpecialCharTok{:}\DecValTok{8}
+\FunctionTok{cbind}\NormalTok{(c1, c2)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      c1 c2
+## [1,]  3  5
+## [2,]  4  6
+## [3,]  5  7
+## [4,]  6  8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{r1 }\OtherTok{\textless{}{-}} \DecValTok{3}\SpecialCharTok{:}\DecValTok{6}
+\NormalTok{r2 }\OtherTok{\textless{}{-}} \DecValTok{5}\SpecialCharTok{:}\DecValTok{8}
+\NormalTok{r3 }\OtherTok{\textless{}{-}} \DecValTok{9}\SpecialCharTok{:}\DecValTok{12}
+\FunctionTok{rbind}\NormalTok{(c1, c2, r3)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    [,1] [,2] [,3] [,4]
+## c1    3    4    5    6
+## c2    5    6    7    8
+## r3    9   10   11   12
+\end{verbatim}
+
+It's good to know that the following expressions result in NaNs and
+infinite.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{0}\SpecialCharTok{/}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NaN
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ConstantTok{Inf}\SpecialCharTok{/}\ConstantTok{Inf}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] NaN
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ConstantTok{Inf}\SpecialCharTok{/}\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] Inf
+\end{verbatim}
+
+\hypertarget{list}{%
+\paragraph{List}\label{list}}
+
+R lists are versatile containers since, unlike atomic vectors, they can
+have mixed data types. Aka generic vectors, lists are (in general)
+heterogeneous data containers which can also have another list as
+element (nested list).
+
+A list is a special type of vector. Each element can be a different
+type.
+
+\begin{itemize}
+\tightlist
+\item
+  To create a list: list()
+\item
+  To convert objects to list: as.list().
+\end{itemize}
+
+An empty list of the required length can be created using vector()
+
+\hypertarget{create-a-list}{%
+\subparagraph{Create a list}\label{create-a-list}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\StringTok{"hola"}\NormalTok{, }\ConstantTok{TRUE}\NormalTok{, }\FloatTok{1.618}\NormalTok{)}
+\NormalTok{x}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [[1]]
+## [1] 5
+## 
+## [[2]]
+## [1] "hola"
+## 
+## [[3]]
+## [1] TRUE
+## 
+## [[4]]
+## [1] 1.618
+\end{verbatim}
+
+\hypertarget{select-list-elements}{%
+\subparagraph{Select list elements}\label{select-list-elements}}
+
+A list's element can be referenced using double square brackets. NB
+index starts from 1.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5
+\end{verbatim}
+
+Since a list is a special type of vector, it can be created also with
+vector().
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#create an empty list}
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{vector}\NormalTok{(}\StringTok{"list"}\NormalTok{, }\AttributeTok{length =} \DecValTok{4}\NormalTok{)}
+\FunctionTok{length}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x[[}\DecValTok{1}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## NULL
+\end{verbatim}
+
+Convert vector to list.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(x)}
+\FunctionTok{length}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5
+\end{verbatim}
+
+\hypertarget{lists-elements-names}{%
+\paragraph{Lists: elements names}\label{lists-elements-names}}
+
+Elements of a list can be named (i.e.~lists can have the names
+attribute)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{l}\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{(}\AttributeTok{a =} \StringTok{"Ciao"}\NormalTok{, }\AttributeTok{b =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\AttributeTok{data =} \FunctionTok{head}\NormalTok{(iris))}
+\FunctionTok{names}\NormalTok{(l)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "a"    "b"    "data"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{l}\SpecialCharTok{$}\NormalTok{a}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Ciao"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{l[[}\StringTok{"b"}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Using a single bracket another list is returned label+element}
+\NormalTok{l[}\DecValTok{1}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## $a
+## [1] "Ciao"
+\end{verbatim}
+
+Functions in R returns only one object, so lists can be handy since they
+are versatile containers that can have labels for elements.
+
+On the console each element of a printed list starts on a new line.
+
+\hypertarget{dataframes}{%
+\subsubsection{Dataframes}\label{dataframes}}
+
+It is maybe the most popular data structure, perfectly suited for
+tabular datasets. It is like a list with each element having the same
+length, i.e.~the column. It is the heterogeneous counterpart of a matrix
+since columns can be of different data type. Also within the same column
+elements can be of different types.
+
+\hypertarget{create-a-dataframe}{%
+\subparagraph{Create a dataframe}\label{create-a-dataframe}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{id =}\NormalTok{ letters[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{], }\AttributeTok{A =} \DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{, }\AttributeTok{B =} \DecValTok{6}\SpecialCharTok{:}\DecValTok{10}\NormalTok{)}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{id =}\NormalTok{ letters[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{5}\NormalTok{], }\AttributeTok{A =} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\StringTok{\textquotesingle{}dos\textquotesingle{}}\NormalTok{,}\ConstantTok{TRUE}\NormalTok{,}\DecValTok{4}\NormalTok{,}\StringTok{\textquotesingle{}cinque\textquotesingle{}}\NormalTok{), }\AttributeTok{B =} \DecValTok{6}\SpecialCharTok{:}\DecValTok{10}\NormalTok{)}
+\NormalTok{df}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   id      A  B
+## 1  a      1  6
+## 2  b    dos  7
+## 3  c   TRUE  8
+## 4  d      4  9
+## 5  e cinque 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#check if it is a list}
+\FunctionTok{is.list}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "data.frame"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{typeof}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "list"
+\end{verbatim}
+
+\hypertarget{useful-functions-with-dataframes}{%
+\subparagraph{Useful functions with
+dataframes}\label{useful-functions-with-dataframes}}
+
+Some useful functions with dataframes follow.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#shows first n rows}
+\FunctionTok{head}\NormalTok{(df,}\AttributeTok{n=}\DecValTok{2}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   id   A B
+## 1  a   1 6
+## 2  b dos 7
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#shows last n rows}
+\FunctionTok{tail}\NormalTok{(df,}\AttributeTok{n=}\DecValTok{3}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   id      A  B
+## 3  c   TRUE  8
+## 4  d      4  9
+## 5  e cinque 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#returns the dimensions of data frame (i.e. number of rows and number of columns)}
+\FunctionTok{dim}\NormalTok{(df) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#number of rows}
+\FunctionTok{nrow}\NormalTok{(df) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#number of columns}
+\FunctionTok{ncol}\NormalTok{(df) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# structure of data frame: name, type and preview for each column}
+\FunctionTok{str}\NormalTok{(df) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    5 obs. of  3 variables:
+##  $ id: Factor w/ 5 levels "a","b","c","d",..: 1 2 3 4 5
+##  $ A : Factor w/ 5 levels "1","4","cinque",..: 1 4 5 2 3
+##  $ B : int  6 7 8 9 10
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#names or colnames() to show the names attribute for a data frame}
+\FunctionTok{names}\NormalTok{(df) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "id" "A"  "B"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{colnames}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "id" "A"  "B"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#shows the class of each column in the data frame}
+\FunctionTok{sapply}\NormalTok{(df, class) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        id         A         B 
+##  "factor"  "factor" "integer"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#the sapply() function takes list, vector or data frame as input and returns vector or matrix as output.}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{selecting-elements-1}{%
+\subparagraph{Selecting elements}\label{selecting-elements-1}}
+
+Similarly to the matrix case, both a row and a column indentifiers must
+be specified.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df[}\DecValTok{1}\NormalTok{, }\DecValTok{3}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 6
+\end{verbatim}
+
+Since data frames are also lists, we can use the list notation: double
+square brackets or \$.
+
+The columns are in fact elements of such list.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df[[}\StringTok{"A"}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1      dos    TRUE   4      cinque
+## Levels: 1 4 cinque dos TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{A}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1      dos    TRUE   4      cinque
+## Levels: 1 4 cinque dos TRUE
+\end{verbatim}
+
+\hypertarget{factors}{%
+\subsubsection{Factors}\label{factors}}
+
+A factor is a data structure specifically built for categorical
+variables that take on only a predefined number of values eg color =
+``yellow'', ``blue'', ``red''. It can also be ordered eg humidity =
+`low', `medium', `high'. These 2 examples have both 3 levels (unique
+categorical values).
+
+\hypertarget{create-a-factor}{%
+\paragraph{Create a factor}\label{create-a-factor}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#explicit level declaration}
+\NormalTok{x }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"single"}\NormalTok{, }\StringTok{"married"}\NormalTok{, }\StringTok{"married"}\NormalTok{, }\StringTok{"married"}\NormalTok{, }\StringTok{"single"}\NormalTok{), }
+            \AttributeTok{levels =} \FunctionTok{c}\NormalTok{(}\StringTok{"single"}\NormalTok{, }\StringTok{"married"}\NormalTok{, }\StringTok{"divorced"}\NormalTok{));}
+\NormalTok{x}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] single  married married married single 
+## Levels: single married divorced
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#if levels are not provided R infers them from the data provided}
+\NormalTok{x2 }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\StringTok{"blue"}\NormalTok{, }\StringTok{"yellow"}\NormalTok{, }\StringTok{"red"}\NormalTok{, }\StringTok{"yellow"}\NormalTok{, }\StringTok{"blue"}\NormalTok{))}
+\NormalTok{x2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] blue   yellow red    yellow blue  
+## Levels: blue red yellow
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#to add a level}
+\FunctionTok{levels}\NormalTok{(x) }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\FunctionTok{levels}\NormalTok{(x), }\StringTok{"complicated"}\NormalTok{) }
+\NormalTok{x}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] single  married married married single 
+## Levels: single married divorced complicated
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x[}\DecValTok{2}\NormalTok{]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] married
+## Levels: single married divorced complicated
+\end{verbatim}
+
+\end{document}

@@ -1,0 +1,420 @@
+---
+title: "Introduction to R"
+output:
+pdf_document: default
+  #html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+R is an object-oriented language: everything in R is an object.
+
+##### R has 6 basic data types:   
+
+* <ins>character</ins>: "a", "ciao"
+* <ins>numeric</ins>: 2, 15.5
+* <ins>integer</ins>: 2L (the L tells R to store this as an integer)
+* <ins>logical</ins>: TRUE, FALSE (aka boolean)
+* <ins>complex</ins>: 1+4i (complex numbers with real and imaginary parts)
+
+
+
+
+##### Examining objects 
+R provides many functions to examine features of vectors and objects in general, eg:
+
+* class() - what kind of object is it (high-level)?
+* typeof() - what is the object’s data type (low-level)?
+* length() - how long is it? What about two dimensional objects?
+* attributes() - does it have any metadata?
+
+###### Example
+
+
+```{r}
+x <- "Hola"
+typeof(x)
+attributes(x)
+```
+
+```{r}
+s <- 1:5
+s
+length(s)
+typeof(s)
+```
+```{r}
+#convert to numeric
+num_s <- as.numeric(s)
+num_s
+typeof(num_s)
+```
+## Data structures
+
+R has many data structures. The main ones are the following:
+
+* atomic vector
+* list
+* matrix
+* data frame
+* factors
+* time series
+
+### Vectors
+
+The most common and basic data structure in R. Vectors can be one of two types:
+  
+* atomic vectors  
+* lists  
+
+_Atomic_ means that the vector only holds data of a single data type. 
+In general the term _vector_ is used in reference to the atomic types only.
+
+
+A vector is a collection of elements usually of mode: character, logical, integer or numeric.
+it is a one-dimensional data structure and it is homogeneous, i.e. each element is of the same type.   
+
+##### Create a vector
+To create an empty vector use vector(). The default mode is logical. You can be more explicit (as shown in the examples below.) It is more common to use direct constructors such as character(), numeric(), etc.
+
+```{r}
+vector()
+
+# a vector of mode 'character' composed of 5 elements
+vector("character", length = 5) 
+
+# same same, but using only the constructor directly.
+character(5) # a 'character' vector composed of 5 elements
+numeric(5)   # a 'numeric' vector with 5 elements
+```
+
+One can create a vector directly specifying their content. R will guess the appropriate mode of storage.
+```{r}
+# this will be treated as double precision real numbers
+v <- c(1, 2, 3)
+# to force treating as integer numbers
+v_num <- c(1L, 2L, 3L)
+# to force treating as integer numbers it can be casted as well
+v <- as.integer(c(1, 2, 3))
+
+#create a vector of mode logical
+y <- c(TRUE, TRUE, FALSE, FALSE)
+
+#create a vectore of mode character
+z <- c("Fabi", "Oriol", "Alessandro", "Jasper", "Alex", "David", "Alejandro", "Laura", "Jasper", "Kevin")
+```
+
+##### Examining vectors
+
+```{r}
+typeof(v)
+length(v)
+class(v)
+str(v)
+typeof(z)
+length(z)
+class(z)
+str(z)
+```
+##### Adding elements to a vector
+```{r}
+#add elements one by one
+en_z <- c(z, "Kevin")
+en_z <- c(z, "Ariadna")
+en_z
+#add two elements at the same time basically concatenating vectors
+En_z <- c(z, c("Kevin", "Ariadna"))
+En_z
+```
+##### Create Vectors from Sequences
+```{r}
+#sequence of numbers
+int_series <- 1:5
+int_series
+series <- 1.5:5.5
+series
+#same same
+seq(10)
+seq(from = 1, to = 5, by = 0.5)
+```
+##### Selecting elements
+```{r}
+#sequence of numbers
+int_series <- 1:5
+int_series[c(1:2,5)]
+```
+##### Special values
+**NA** = Not Available
+```{r}
+
+x <- c(0.5, NA, 0.7)
+#check if there are NA elements one by one
+is.na(x)
+#check if there is any NA element
+anyNA(x)
+```
+**Inf** = infinite
+```{r}
+4/0
+```
+
+**NaN** = Not a Number = undefined value.
+```{r}
+0/0
+Inf/Inf
+Inf/0
+```
+
+##### Vectors with mixed types elements
+```{r}
+#r automatically converts to a single type
+m1 <- c(1.7, "a")
+m1
+m2 <- c(TRUE, 2)
+m2
+m3 <- c(FALSE, 3)
+m3
+m4 <- c("a", TRUE)
+m4
+```
+### Matrices
+Multi dimensional atomic vectors, as such they are homogeneous structures containing just one data type. Generally 2 dimensions: rows and columns.
+
+##### Create a matrix
+
+```{r}
+m <- matrix(nrow = 3, ncol = 4)
+m
+#print dimensions nrows and ncols
+dim(m)
+
+#high level type
+class(m)
+
+#low level type
+typeof(m)
+
+m <- matrix(c(1,3))
+m
+#print dimensions nrows and ncols
+dim(m)
+
+#high level type
+class(m)
+
+#low level type
+typeof(m)
+
+mq <- matrix(
+  c(1, 1, 2, 3),
+  nrow = 2,
+  ncol = 6)
+mq
+```
+
+Matrices are filled columns wise.
+```{r}
+m <- matrix(1:6, nrow = 2, ncol = 3)
+m
+```
+
+##### Select matrix elements
+To reference a matrix element: specify the index along each dimension in single square brackets, e.g. m[row_index, column_index].    
+
+```{r}
+mq[1,4]
+mq[2,4]
+typeof(mq[1,1]) == typeof(mq)
+mq[9] #this selects the ninth element column-wise
+```
+
+##### Create a matrix from a vector 
+```{r}
+v <- 1:10
+#assigning dimension to the matrix
+dim(v) <- c(2, 5) 
+#dim(v) <- c(5, 2) 
+v
+```
+##### Create a matrix binding rows or columns 
+* rbind() to bind rows  
+* cbind() to bind columns   
+    
+NB Dimesions must match!
+
+```{r}
+c1 <- 3:6
+c2 <- 5:8
+cbind(c1, c2)
+```
+```{r}
+r1 <- 3:6
+r2 <- 5:8
+r3 <- 9:12
+rbind(r1, r2, r3)
+```
+
+
+
+It's good to know that the following expressions result in NaNs and infinite.
+```{r}
+0/0
+Inf/Inf
+Inf/0
+```
+
+#### List
+
+R lists are versatile containers since, unlike atomic vectors, they can have mixed data types. Aka generic vectors, lists are (in general) heterogeneous data containers which can also have another list as element (nested list).  
+
+A list is a special type of vector. Each element can be a different type.
+
+* To create a list: list()
+* To convert objects to list:  as.list().
+
+An empty list of the required length can be created using vector()
+
+##### Create a list
+
+```{r}
+x <- list(5, "hola", TRUE, 1.618)
+x
+```
+##### Select list elements
+A list's element can be referenced using double square brackets.
+NB index starts from 1.
+```{r}
+x[[1]]
+```
+
+Since a list is a special type of vector, it can be created also with vector().
+```{r}
+#create an empty list
+Listax <- vector("list", length = 4)
+length(Listax)
+x[[1]]
+```
+
+Convert vector to list.
+
+```{r}
+litax <- 1:5
+litax <- as.list(litax)
+length(litax)
+```
+
+#### Lists: elements names
+Elements of a list can be named (i.e. lists can have the names attribute)
+```{r}
+l<- list(a = "Ciao", b = 1:5, data = head(iris))
+names(l)
+l$a
+l$b
+l[["b"]]
+#Using a single bracket another list is returned label+element
+l[2]
+```
+
+Functions in R returns only one object, so lists can be handy since they are versatile containers that can have labels for elements.
+    
+On the console each element of a printed list starts on a new line.   
+
+### Dataframes
+It is maybe the most popular data structure, perfectly suited for tabular datasets. It is like a list with each element having the same length, i.e. the column.
+It is the heterogeneous counterpart of a matrix since columns can be of different data type. Also within the same column elements can be of different types.
+
+  
+##### Create a dataframe
+```{r}
+df <- data.frame(id = 1:5, A = 1:5, B = 6:10)
+df
+df <- data.frame(id = letters[1:5], A = c(1,'dos',TRUE,4,'cinque'), B = 6:10)
+df
+```
+
+```{r}
+#check if it is a list
+is.list(df)
+class(df)
+typeof(df)
+```
+##### Useful functions with dataframes
+
+Some useful functions with dataframes follow.
+
+```{r}
+#shows first n rows
+head(df,n=2) 
+```
+```{r}
+#shows last n rows
+tail(df,n=3)
+```
+```{r}
+#returns the dimensions of data frame (i.e. number of rows and number of columns)
+dim(df) 
+#number of rows
+nrow(df) 
+#number of columns
+ncol(df) 
+```
+```{r}
+# structure of data frame: name, type and preview for each column
+str(df) 
+#names or colnames() to show the names attribute for a data frame
+names(df) 
+colnames(df)
+#shows the class of each column in the data frame
+sapply(df, class) 
+#the sapply() function takes list, vector or data frame as input and returns vector or matrix as output.
+```
+
+##### Selecting elements
+Similarly to the matrix case, both a row and a column identifiers must be specified.
+```{r}
+df[1, 3]
+```
+
+Since data frames are also lists, we can use the list notation: double square brackets or $.
+
+The columns are in fact elements of such list.
+
+```{r}
+df[["A"]]
+df$A
+df$"B"
+```
+
+### Factors
+
+A factor is a data structure specifically built for categorical variables that take on only a predefined number of values eg color = "yellow", "blue", "red". It can also be ordered eg humidity = 'low', 'medium', 'high'. These 2 examples have both 3 levels (unique categorical values).
+
+
+#### Create a factor 
+
+```{r}
+#explicit level declaration
+x <- factor(c("single", "married", "married", "married", "single"), 
+            levels = c("single", "married", "divorced"));
+x
+# x <- c(levels(x), "single")
+# x
+# x <- c(levels(x), "married")
+# x
+
+
+#if levels are not provided R infers them from the data provided
+x2 <- factor(c("blue", "yellow", "red", "yellow", "blue"))
+
+x2
+
+#to add a level
+levels(x) <- c(levels(x), "complicated") 
+x
+
+x[4]
+```

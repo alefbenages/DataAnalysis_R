@@ -1,0 +1,107 @@
+---
+title: "Intro to R Markdown"
+author: Giammarco Quaglia
+date: 18/03/2021
+output: html_document
+---
+
+
+<!-- YAML (a recursive acronym for "YAML Ain't Markup Language") header --> 
+
+### What is R Markdown?
+
+An R Markdown document is basically a notebook in which both text and code can be shown, this includes also the plots that might ouput from a code chunk.
+It is perfect for reports and can be knitted to HTML, PDF, and MS Word documents. The knit button will run all the code chuncks as well as rendering both the textual parts and the outputs.
+
+
+In this short guide you will learn about the basics of R Markdown focusing on the code chunks. Go through [this](https://www.markdowntutorial.com) short tutorial to learn the basics of markdown which covers:    
+
+* _Italics_ and **Bold**
+* Headers
+* [Links](https://www.google.com/)
+* Images
+* Blockquotes
+* Paragraphs
+* Bullet points list
+ 
+The first few lines of an R Markdown document are generally like the following. The last line specifies the output type (html/pdf/word).    
+\-\-\-     
+title: "Intro to R Markdown"   
+author: Giammarco Quaglia    
+date: 18/03/2021   
+output: html_document   
+\-\-\-     
+Do not forget the three dashes!
+
+
+### Code chunks
+
+Three backwards apostrophes must be put before and after the code chunk: 
+\`\`\`{r} 
+some code 
+\`\`\`
+
+```{r}
+f <- 'ciao'
+print(f) 
+```
+
+Adding **echo=FALSE** will hide the code but the output will be shown (very useful for plots):
+
+```{r, echo=FALSE}
+f <- 'ciao'
+print(f)
+```
+No code is shown, but the output is printed out as before.
+
+Using **include = FALSE** nothing will be shown (usually not a good practice).
+```{r, include = FALSE}
+f <- 'ciao'
+print(f)
+```
+
+
+
+#### R code chunks parameters
+* __eval__	eval=TRUE	to run (or not) the code and include its results in the output
+* __include__	include=TRUE	to display code and results 
+* __echo__	echo=TRUE code displayed alongside results
+* __results__	results="markup"	Specify how to treat results
+  * "markup" = put results in a special LaTeX environment
+  * "hide" (or FALSE) = no results, this option applies only to normal R output (not warnings, messages or errors)
+  * "asis" = output as-is, i.e., as from R without formatting
+  * "hold" = hold all the output pieces and push them to be compiled at the end of a chunk
+* __warning__	warning=TRUE	Display warning messages
+* __error__	error=FALSE	Whether to display error messages
+* __message__	message=TRUE	Messages displayed
+* __tidy__	tidy=FALSE	Code reformatted to make it look “tidy”
+* __cache__	cache=FALSE	To cache the results for future renders
+* __comment__	comment="##"	Specify which character are results prefaced with
+* __fig.width__, fig.height	fig.width=7	Specify width/height (in inches) of the plots
+* __fig.align__	fig.align="left"	Where to align the figure "left" "right" "center"
+
+
+```{r, include=FALSE}
+f <- 'ciao'
+print(f)
+```
+Examplke using: comment="-##-".
+```{r, include=TRUE, comment="-##-"}
+s <- 'Bella!'
+print(s)
+```
+
+      
+#### Code inside text  
+It is also possible to insert "inline" chunk codes, eg     
+- The cars dataset has \` r nrow(cars) \` rows     
+will be knitted as:    
+- The cars dataset has `r nrow(cars)` observations. 
+
+#### Comments
+To make comments use \<!\-\- blabla \-\->, everything in between those two symbols will not be knitted or shown in your html/pdf/word document.  
+
+<!-- comment --> 
+___   
+_**Enjoy R Markdown!**_
+     

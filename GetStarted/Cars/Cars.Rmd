@@ -84,7 +84,7 @@ plot(cars, col='blue', pch=20, cex=2,
 There is a clear positive correlation between Speed and Distance. 
 
 ## 1.3 Missing Values?
-If there are, the summarye() will count how many NA’s you have.
+If there are, the summary()) will count how many NA’s you have.
 ```{r}
 summary(cars)
 ```
@@ -92,8 +92,14 @@ summary(cars)
 Also you can show your NA’s through logical data. (TRUE if it’s missing, FALSE if it’s not.)
 
 ```{r}
-is.na(cars) 
+#is.na(cars) 
 ```
+
+For a compact version, the any() function could be used. 
+```{r}
+any(is.na(cars))
+```
+
 
 Replace the missing values with the mean, which is common technique, but **something to use with care with as it can skew the data**.
 ```{r}
@@ -114,7 +120,7 @@ trainSize<-round(nrow(cars)*0.7) # 70/30%
 testSize<-nrow(cars)-trainSize
 ```
 
-Just to check the dimension of the empty vectors.
+Just to check the dimension of the vectors.
 ```{r}
 print(trainSize)
 print(testSize)
@@ -129,7 +135,7 @@ testSet<-cars[-training_indices,]
 ```
 
 # 3. Linear Regression 
-The next step is to predict the cars distances through the speed of the cars. To do this, we’ll be using the prediction function – predict()
+The next step is to predict the cars stopping distances through the speed of the cars. To do this, we’ll be using the prediction function – predict()
 
 * **Input / Independent Variable / Y **: Speed of the cars (speed)
     
@@ -144,13 +150,15 @@ A regression model of *first grade*, can be defined by the equation of a straigh
 Replacing some values
 $$ Distance = slope * Speed + y.intercept$$ 
 
-the syntaxis on R is quite straightforward  $lm(Y ~ X, dataset)$ where **lm** stands for *linear model*.
+The syntaxis on R is quite straightforward  $lm(Y ~ X, dataset)$ where **lm** stands for *linear model*.
 
-To avoid **overfitting**, we use the **Train Set** to fit the model. 
+In this particular problem is important to understand the physics behind it. I don{t know which will be the stopping distance of a car at a certain velocity. But if the car has velocity = 0, the stopping distance also **must be** equal to 0. To force that the y-interception term must be modified to $ 0 + y.intercept $ 
+
+Finally, to avoid **overfitting**, we use the **Train Set** to fit the model. 
 
 ```{r}
 # The basic line of code for the linear model function. 
-cars_regression <-lm(dist ~ speed, trainSet)
+cars_regression <-lm(dist ~  0 + speed, trainSet)
 ```
 
 thats all!. Now to see the metrics of the model, just call **summary()**
@@ -181,21 +189,19 @@ predict(cars_regression,testSet, interval='prediction')
 
 ## 3.2 Fitting a line
 
-As we used a model with a first grade equation, the parameters that define the line that fits our model are 2, **slope** and **y-Intersection**. 
+As we used a model with a first grade equation, the parameters that define the line that fits our model are 2, **slope** and **y-Intersection**. In this case there is only one value because y-intercept was forced to be equal to 0. 
 ```{r echo=FALSE}
-lm(dist ~ speed, trainSet)
-
+cars_regression
 ```
 
 So, now we can plot both, the dots of our data, and the line that fits them.  
 
 ```{r}
-plot(cars, col='blue', pch=20, cex=2, 
+plot(trainSet, col='blue', pch=20, cex=2, 
      main="Speed and Stopping Distance for 50 Cars", 
      xlab="Speed [mph]", ylab="Stopping Distance [feet]")
 
-
-abline(-13.082, 3.582)
+abline(cars_regression)
 ```
 
 ## 3.3 Residual plots
