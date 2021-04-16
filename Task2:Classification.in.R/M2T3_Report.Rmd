@@ -1,8 +1,10 @@
 ---
-title: "CUSTOMER BRAND PREFERENCES REPORT"
+title: 'REPORT: CUSTOMER BRAND PREFERENCES'
 author: "Ale F. Benages"
 date: "04/15/2021"
-output: html_notebook
+output:   html_document
+#  html_document: 
+#    toc: yes
 ---
 
 # Introduction
@@ -22,13 +24,20 @@ The constructed model was able to guess the brand choice from the incomplete sur
 # Increase margin size
 par(mar=c(5,8,1,1)) #bottom, left, top, right respectively.
 
-barplot(allValues,
-        col = c("lightblue", "mistyrose", "lightblue", "mistyrose"),
-        horiz = TRUE, 
-        names.arg = c("True Acer", "Guessed Acer", "True Sony", "Guessed Sony"), 
-        las = 2,
-        xlab="Proportion")
+barplot(allValues, 
+  col = c("lightblue", "mistyrose", "lightblue", "mistyrose"),
+  horiz = TRUE, 
+  names.arg = c("True Acer", "Guessed Acer", "True Sony", "Guessed Sony"), 
+  las = 2,
+  xlab="Proportion")
 ```
+
+
+```{r}
+print(allValues)
+```
+
+
 The exact values the graph are:
 
 - Proportion of Guessed Sony: 0.61  

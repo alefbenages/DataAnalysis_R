@@ -2,7 +2,9 @@
 title: "M3T2_FirstContact"
 author: "Ale F. Benages"
 date: "3/30/2021"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 # Library
@@ -315,140 +317,154 @@ testing <- ComResp_norm[-inTraining,]
 
 ## Models
 
-### GBM1 - Stochastic Gradient boosting ()
+> Models training commented, to avoid execution. 
+
+<!-- ### GBM1 - Stochastic Gradient boosting () -->
+<!-- ```{r} -->
+<!-- fitControl_gbmFit1 <- trainControl(## 10-fold CV -->
+<!--                            method = "repeatedcv", -->
+<!--                            number = 5, -->
+<!--                            ## repeated ten times -->
+<!--                            repeats = 5) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- set.seed(123) -->
+<!-- gbmFit1 <- train(brand ~ ., ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variablesin the dataframe -->
+<!--                  data = training,  -->
+<!--                  method = "gbm",  -->
+<!--                  trControl = fitControl_gbmFit1, -->
+<!--                  ## This last option is actually one for gbm() that passes through -->
+<!--                  verbose = FALSE) -->
+<!-- gbmFit1 -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- varImp(gbmFit1) -->
+<!-- ``` -->
+
+<!-- ### GBM2 - Stochastic Gradient boosting  K-10 -->
+<!-- ```{r} -->
+<!-- fitControl_gbmFit2 <- trainControl(## 10-fold CV -->
+<!--                            method = "repeatedcv", -->
+<!--                            number = 10, -->
+<!--                            ## repeated ten times -->
+<!--                            repeats = 5) -->
+
+<!-- ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variables in the dataframe -->
+<!-- gbmFit2 <- train(brand ~ .,             -->
+<!--                  #brandLabeled ~ .,  -->
+<!--                  #data = training_reduced, # with the redued dataset -->
+<!--                  data = training,  -->
+<!--                  method = "gbm",  -->
+<!--                  trControl = fitControl_gbmFit2, -->
+<!--                  ## This last option is actually one for gbm() that passes through -->
+<!--                  verbose = FALSE) -->
+<!-- gbmFit2 -->
+<!-- varImp(gbmFit2) -->
+<!-- ``` -->
+
+<!-- ### RF1 - repeatedcv -->
+<!-- ```{r} -->
+<!-- #10 fold cross validation -->
+<!-- fitControl_rf1 <- trainControl(method = "repeatedcv", -->
+<!--                                number = 5,  -->
+<!--                                repeats = 5) -->
+
+<!-- #train Random Forest Regression model with a tuneLenght = 5 (trains with 1 mtry value for RandomForest) -->
+<!-- rfFit1 <- train(brand ~.,  #brandLabeled ~.,  -->
+<!--                 data = training, -->
+<!--                 method = "rf",  -->
+<!--                 trControl=fitControl_rf1,  -->
+<!--                 tuneLength = 5) -->
+
+<!-- rfFit1  -->
+<!-- varImp(rfFit1) -->
+<!-- ``` -->
+
+
+<!-- ### RF2 - random search -->
+<!-- ```{r} -->
+<!-- #10 fold cross validation -->
+<!-- fitControl_rf2 <- trainControl(method = "repeatedcv",  -->
+<!--                                number = 10, -->
+<!--                                repeats = 5, -->
+<!--                                search = 'random') -->
+
+<!-- rfFit2 <- train(brand ~.,   -->
+<!--                 data = training,  # training performed in the full dataset -->
+<!--                 method = "rf",  -->
+<!--                 trControl = fitControl_rf2) -->
+
+<!-- rfFit2  -->
+<!-- varImp(rfFit2) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot(varImp(rfFit2)) -->
+<!-- ``` -->
+
+
+<!-- ### RF3 - Mtry   -->
+<!-- ```{r} -->
+<!-- #10 fold cross validation -->
+<!-- fitControl_rf3 <- trainControl(method = "repeatedcv",  -->
+<!--                                number = 10,  -->
+<!--                                repeats = 3, -->
+<!--                                search = 'random' ) -->
+
+<!-- mtry <- sqrt(ncol(training))  # training_reduced  -->
+<!-- metric <- "Accuracy" -->
+
+<!-- rfFit3 <- train(brand ~.,  #brandLabeled ~.,  -->
+<!--                 data = training, # data = training_reduced,  -->
+<!--                 method = "rf",  -->
+<!--                 metric=metric,  -->
+<!--                 tuneLength=15, -->
+<!--                 trControl = fitControl_rf3) -->
+
+<!-- print(rfFit3)  -->
+<!-- plot(rfFit3) -->
+<!-- varImp(rfFit3) -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- plot(varImp(rfFit3)) -->
+<!-- ``` -->
+
+
+<!-- ### C50 -->
+<!-- ```{r  fig.height=30, fig.width=30} -->
+<!-- #tree_mod <- C5.0(x = train_data[, vars], y = train_data$Status) -->
+<!-- #c50Fit <- C5.0( x= training_reduced[,c('salary','age')], y= training_reduced$brandLabeled) -->
+<!-- c50Fit <- C5.0( x= training[,c('salary','age','elevel','car','zipcode','credit')], y= training$brand) -->
+<!-- summary(c50Fit) -->
+<!-- plot(c50Fit) -->
+<!-- varImp(c50Fit) -->
+<!-- ``` -->
+<!-- ### save the MODELS! -->
+<!-- [ejemplo de uso](https://machinelearningmastery.com/finalize-machine-learning-models-in-r/) -->
+<!-- ```{r} -->
+<!-- saveRDS(gbmFit1, './Models/gbmFit1.rds') -->
+<!-- saveRDS(gbmFit2, './Models/gbmFit2.rds') -->
+<!-- saveRDS(rfFit1, './Models/rfmFit1.rds') -->
+<!-- saveRDS(rfFit2, './Models/rfmFit2.rds') -->
+<!-- saveRDS(rfFit3, './Models/rfmFit3.rds') -->
+<!-- saveRDS(c50Fit, './Models/c50Fit.rds') -->
+<!-- ``` -->
+## Load the Models
+as I avoided the execution of the models, but previously saved them, I load them from them memory
 ```{r}
-fitControl_gbmFit1 <- trainControl(## 10-fold CV
-                           method = "repeatedcv",
-                           number = 5,
-                           ## repeated ten times
-                           repeats = 5)
-```
-
-```{r}
-set.seed(123)
-gbmFit1 <- train(brand ~ ., ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variablesin the dataframe
-                 data = training, 
-                 method = "gbm", 
-                 trControl = fitControl_gbmFit1,
-                 ## This last option is actually one for gbm() that passes through
-                 verbose = FALSE)
-gbmFit1
-```
-
-```{r}
-varImp(gbmFit1)
-```
-
-### GBM2 - Stochastic Gradient boosting  K-10
-```{r}
-fitControl_gbmFit2 <- trainControl(## 10-fold CV
-                           method = "repeatedcv",
-                           number = 10,
-                           ## repeated ten times
-                           repeats = 5)
-
-## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variables in the dataframe
-gbmFit2 <- train(brand ~ .,            
-                 #brandLabeled ~ ., 
-                 #data = training_reduced, # with the redued dataset
-                 data = training, 
-                 method = "gbm", 
-                 trControl = fitControl_gbmFit2,
-                 ## This last option is actually one for gbm() that passes through
-                 verbose = FALSE)
-gbmFit2
-varImp(gbmFit2)
-```
-
-### RF1 - repeatedcv
-```{r}
-#10 fold cross validation
-fitControl_rf1 <- trainControl(method = "repeatedcv",
-                               number = 5, 
-                               repeats = 5)
-
-#train Random Forest Regression model with a tuneLenght = 5 (trains with 1 mtry value for RandomForest)
-rfFit1 <- train(brand ~.,  #brandLabeled ~., 
-                data = training,
-                method = "rf", 
-                trControl=fitControl_rf1, 
-                tuneLength = 5)
-
-rfFit1 
-varImp(rfFit1)
+gbmFit1 <- readRDS("./Models/gbmFit1.rds")
+gbmFit2 <- readRDS ('./Models/gbmFit2.rds')
+rfFit1 <- readRDS ('./Models/rfmFit1.rds')
+rfFit2 <- readRDS ('./Models/rfmFit2.rds')
+rfFit3 <- readRDS ('./Models/rfmFit3.rds')
+c50Fit <- readRDS ('./Models/c50Fit.rds')
 ```
 
 
-### RF2 - random search
-```{r}
-#10 fold cross validation
-fitControl_rf2 <- trainControl(method = "repeatedcv", 
-                               number = 10,
-                               repeats = 5,
-                               search = 'random')
 
-rfFit2 <- train(brand ~.,  
-                data = training,  # training performed in the full dataset
-                method = "rf", 
-                trControl = fitControl_rf2)
-
-rfFit2 
-varImp(rfFit2)
-```
-
-```{r}
-plot(varImp(rfFit2))
-```
-
-
-### RF3 - Mtry  
-```{r}
-#10 fold cross validation
-fitControl_rf3 <- trainControl(method = "repeatedcv", 
-                               number = 10, 
-                               repeats = 3,
-                               search = 'random' )
-
-mtry <- sqrt(ncol(training))  # training_reduced 
-metric <- "Accuracy"
-
-rfFit3 <- train(brand ~.,  #brandLabeled ~., 
-                data = training, # data = training_reduced, 
-                method = "rf", 
-                metric=metric, 
-                tuneLength=15,
-                trControl = fitControl_rf3)
-
-print(rfFit3) 
-plot(rfFit3)
-varImp(rfFit3)
-```
-
-```{r}
-plot(varImp(rfFit3))
-```
-
-
-### C50
-```{r  fig.height=30, fig.width=30}
-#tree_mod <- C5.0(x = train_data[, vars], y = train_data$Status)
-#c50Fit <- C5.0( x= training_reduced[,c('salary','age')], y= training_reduced$brandLabeled)
-c50Fit <- C5.0( x= training[,c('salary','age','elevel','car','zipcode','credit')], y= training$brand)
-summary(c50Fit)
-plot(c50Fit)
-varImp(c50Fit)
-```
-
-### save the MODELS!
-[ejemplo de uso](https://machinelearningmastery.com/finalize-machine-learning-models-in-r/)
-```{r}
-saveRDS(gbmFit1, './gbmFit1.rds')
-saveRDS(gbmFit2, './gbmFit2.rds')
-saveRDS(rfFit1, './rfmFit1.rds')
-saveRDS(rfFit2, './rfmFit2.rds')
-saveRDS(rfFit3, './rfmFit3.rds')
-saveRDS(c50Fit, './c50Fit.rds')
-```
 
 
 ## Predictions on the Complete Survey - (Ground Truth)
@@ -529,17 +545,33 @@ just to check if everything still nice... train again the RF2 with the reduced d
 inTraining_reduced <- createDataPartition(ComResp_norm_reduced$brandLabeled, p = .75, list = FALSE)
 training_reduced <- ComResp_norm_reduced[inTraining_reduced,]
 testing_reduced <- ComResp_norm_reduced[-inTraining_reduced,]
-
-# fitControl_rf2 <- is the same than above
-
-rfFit2_reduced <- train(brandLabeled ~.,  
-                data = training_reduced, # the dataset reduced 
-                method = "rf", 
-                trControl = fitControl_rf2)
-
-rfFit2_reduced 
-varImp(rfFit2_reduced)
 ```
+
+Commented this part of the code to avoid execution. But the model is saved in memory.
+<!-- ```{r} -->
+<!-- # fitControl_rf2 <- is the same than above -->
+
+<!-- rfFit2_reduced <- train(brandLabeled ~.,   -->
+<!--                 data = training_reduced, # the dataset reduced  -->
+<!--                 method = "rf",  -->
+<!--                 trControl = fitControl_rf2) -->
+
+<!-- rfFit2_reduced  -->
+<!-- varImp(rfFit2_reduced) -->
+<!-- ``` -->
+<!-- ### save the MODELS! 2 -->
+
+<!-- ```{r} -->
+<!-- saveRDS(rfFit2_reduced, './Models/rfFit2_reduced.rds') -->
+<!-- ``` -->
+
+
+## Load the Models
+as I avoided the execution of the models, but previously saved them, I load them from them memory
+```{r}
+rfFit2_reduced <- readRDS("./Models/rfFit2_reduced.rds")
+```
+
 
 ```{r}
 predictions_reduced <- predict(rfFit2_reduced, testing_reduced)
@@ -548,11 +580,7 @@ confusionMatrix(predictions_reduced, testing_reduced$brandLabeled)
 ```
 
 
-### save the MODELS! 2
 
-```{r}
-saveRDS(rfFit2_reduced, './rfFit2_reduced.rds')
-```
 
 
 
@@ -607,7 +635,7 @@ I this case I want to guess the brand choice, out target variable, from the *Inc
 ## Load the model
 will load the saved copy of the model: **RF2_reduced**
 ```{r}
-super_model <- readRDS("./rfFit2_reduced.rds")
+super_model <- readRDS("./Models/rfFit2_reduced.rds")
 print(super_model)
 ```
 
@@ -631,14 +659,13 @@ A sample is just a part of a population. It is important to compare the distribu
 ### Salary
 ```{r}
 options(scipen = 999) # removes scientific notation
-ggplot(ComResp, aes(x=salary)) +
-    geom_density(fill="#69b3a2", color="red") + 
-    ggtitle("Salary - Complete survey")
+ggplot(ComResp, aes(x=salary)) + geom_density(fill="#69b3a2", color="red") + ggtitle("Salary - Complete survey")
 
-ggplot(IncompleteResp, aes(x=salary)) +
-    geom_density(fill="#69b3a2", color="blue") + 
-    ggtitle("Salary - Incomplete survey")
+ggplot(IncompleteResp, aes(x=salary)) + geom_density(fill="#69b3a2", color="blue") + ggtitle("Salary - Incomplete survey")
 
+
+ggplot(ComResp, aes(x=salary)) + geom_boxplot(fill="#A19F99", color="red")  + ggtitle("Salary - Complete survey")
+ggplot(IncompleteResp, aes(x=salary)) + geom_boxplot(fill="#A19F99", color="blue") + ggtitle("Salary - Incomplete survey") 
 ```
 
 ### Age
@@ -651,6 +678,9 @@ ggplot(ComResp, aes(x=age)) +
 ggplot(IncompleteResp, aes(x=age)) +
     geom_density(fill="#69b3a2", color="blue") + 
   ggtitle("Age - Incomplete survey")
+
+ggplot(ComResp, aes(x=age)) + geom_boxplot(fill="#56B4E9", color="red") + ggtitle("Age - Complete survey")
+ggplot(IncompleteResp, aes(x=age)) + geom_boxplot(fill="#56B4E9", color="Blue")  + ggtitle("Age - Incomplete survey")
 ```
 
 
@@ -665,6 +695,9 @@ ggplot(ComResp, aes(x=credit)) +
 ggplot(IncompleteResp, aes(x=credit)) +
     geom_density(fill="#69b3a2", color="blue") + 
   ggtitle("Credit - Incomplete survey")
+
+ggplot(ComResp, aes(x=credit)) + geom_boxplot(fill="#E69F00", color="red")  + ggtitle("Credit - Complete survey")  
+ggplot(IncompleteResp, aes(x=credit)) + geom_boxplot(fill="#E69F00", color="blue") + ggtitle("Credit - Incomplete survey")
 ```
 
 
@@ -718,19 +751,22 @@ head(guess_DF)
 
 
 ```{r}
-proportion_true/proportion_guessed
+proportion_true_sony/proportion_guessed_sony
 ```
 
 ```{r}
 # Increase margin size
 par(mar=c(3,8,1,1)) #bottom, left, top, right respectively.
 
-barplot(allValues,
-        col = c("lightblue", "mistyrose", "lightblue", "mistyrose"),
-        horiz = TRUE, 
-        names.arg = c("True Acer", "Guessed Acer", "True Sony", "Guessed Sony"), 
-        las = 2,
-        xlab="Proportion")
+#plot_proportions <- barplot(allValues, 
+barplot(allValues, 
+  col = c("lightblue", "mistyrose", "lightblue", "mistyrose"),
+  horiz = TRUE, 
+  names.arg = c("True Acer", "Guessed Acer", "True Sony", "Guessed Sony"), 
+  las = 2,
+  xlab="Proportion")
+
+#plot_proportions
 ```
 
 
