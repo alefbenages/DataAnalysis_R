@@ -1,0 +1,127 @@
+---
+title: "Predictive Modeling with R and CARET package"
+author: "Ale F. Benages"
+date: "3/29/2021"
+output: html_document
+---
+
+
+
+## Data Splitting and Estimating Performance
+
+### Model Building Steps
+Common steps during model building are:  
+1. estimating model parameters (i.e. training models)  
+2. determining the values of tuning parameters that cannot be directly calculated from the data  
+3. calculating the performance of the final model that will generalize to new data
+
+### Spending Our Data
+
+How do we “spend” the data to find an optimal model? We typically split data into training and test data sets:   
+
+* **Training Set:** these data are used to estimate model parameters and to pick the values of the complexity parameter(s) for the model.  
+* **Test Set (aka validation set):** these data can be used to get an independent assessment of model ecacy. They should not be used during model training.  
+
+The caret package has a function *createDataPartition* that conducts data splits within groups of the
+data.
+
+## Estimating Performance
+Later, once you have a set of predictions, various metrics can be used to evaluate performance.  
+Honest estimates of these statistics cannot be obtained by predicting the same samples that were used to train the model. So train/test sets should be used.  
+
+### for Regression Models:
+
+* **R2** is very popular. In many complex models, the notion of the model degrees of freedom is diffcult. Unadjusted R2 can be used, but does not penalize complexity. (caret:::RMSE, pls:::RMSEP)  
+* **the root mean square error (RMSE)** is a common metric for understanding the performance (caret:::Rsquared, pls:::R2)
+* **Spearman’s correlation** may be applicable for models that are used eto rank samples (cor(, method = "spearman"))
+
+### for Classification Models:
+
+* **overall accuracy** can be used, but this may be problematic when the classes are not balanced.  
+* **the Kappa statistic** takes into account the expected error rate: $k = (O - E) / (1 - E)$ where O is the observed accuracy and E is the expected accuracy under chance agreement (psych:::cohen.kappa, vcd:::Kappa, ...)
+* For 2–class models, **Receiver Operating Characteristic (ROC)** curves can be used to characterize model performance (more later)
+
+A **“ confusion matrix”** is a cross–tabulation of the observed and predicted classes. The caret package (confusionMatrix), the mda (confusion) and others. 
+
+**ROC curve** functions are found in the ROCR package (performance), the verification package (roc.area), the pROC package (roc) and others.
+
+[ROC and AUC clearly explained!, by StatQuest](https://www.youtube.com/watch?v=4jRBRDbJemM&list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF&index=6&t=2s)  
+[ROC and AUC in R, by StatQuest](https://www.youtube.com/watch?v=qcvAqAH60Yw&list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF&index=7)
+
+With two classes the Receiver Operating Characteristic (ROC) curve can be used to estimate performance using a combination of sensitivity and specificity. Given the probability of an event, many alternative cutoffs can be evaluated (instead of just a 50% cutoff). For each cutoff, we can calculate the sensitivity and specificity.
+The **ROC curve** plots the sensitivity (eg. true positive rate) by one minus specificity (eg. the false positive rate). **The area under the ROC curve, AUC** is a common metric of performance. Given two AUC curves, the one with a bigger area is the one that performs better. 
+
+
+For **2–class classification models** we might also be interested in: 
+
+* **Sensitivity:** given that a result is truly an event, what is the probability that the model will predict an event results?
+* **Specificity:** given that a result is truly not an event, what is the probability that the model will predict a negative results?
+(an “event” is really the event of interest)
+
+These conditional probabilities are directly related to the false positive and false negative rate of a method.
+
+The caret package has functions called sensitivity and specificity
+
+
+## Data Pre–Processing  
+There are a wide variety of models in R. Some models have different assumptions on the predictor data and may need to be pre–processed.  
+
+**Examples of of pre–processing operations:**  
+1. centering and scaling  
+2. imputation of missing data  
+3. transformations of individual predictors (e.g. Box–Cox transformations of the predictors)  
+4. transformations of the groups of predictors  
+
+The preProcess class can be used for many operations on predictors, including centering and scaling. The function preProcess estimates the required parameters for each operation and predict.preProcess is used to apply them to specific data sets. This function can also be interfaces when calling the train function.
+
+### Centering and scaling
+
+
+
+
+
+## Over–Fitting and Resampling
+
+
+
+
+# minium content review
+https://topepo.github.io/caret/
+
+## 1. createDataPartition()
+The function createDataPartition can be used to create balanced splits of the data. If the y argument to this function is a factor, the random sampling occurs within each class and should preserve the overall class distribution of the data. For example, to create a single 80/20% split of the iris data:
+
+
+```{r}
+library(caret)
+set.seed(3456)
+trainIndex <- createDataPartition(iris$Species, p = .8, 
+                                  list = FALSE, 
+                                  times = 1)
+```
+The **list = FALSE** avoids returning the data as a list. This function also has an argument, **times**, that can create multiple splits at once; the data indices are returned in a list of integer vectors. Similarly, createResample can be used to make simple bootstrap samples and createFolds can be used to generate balanced cross–validation groupings from a set of data.
+
+```{r}
+head(trainIndex)
+```
+shows the head of the trainIndex
+
+
+```{r}
+irisTrain <- iris[ trainIndex,]
+irisTest  <- iris[-trainIndex,]
+```
+finally, using the index, we select the data to create the Train/Test sets.
+
+
+## 2. trainControl()
+
+
+## 3. train()
+## 4. predict()
+## 5. postResample()
+
+
+
+
+

@@ -1,0 +1,779 @@
+---
+title: "M3T2_FirstContact"
+author: "Ale F. Benages"
+date: "3/30/2021"
+output: html_document
+---
+
+# Library
+```{r}
+library(caret, ggplot2)
+library(ggridges)
+library(plyr)
+library(skimr) # to get a fast overview of all the variables. Fast&Dirty EDA
+#library(tictoc)
+library(mlbench)
+library(gbm)
+library(C50)
+set.seed(9982)
+```
+
+
+# Load CSV
+```{r}
+path_to_file <- "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task2:Classification.in.R/SurveyData/CompleteResponses.csv"
+
+ComResp <- read.csv(path_to_file)
+
+str(ComResp) # with srt() we can see the structure of the dataframe
+# head(ComResp) # with head we get a similar output but with the classic dataframe structure
+```
+
+# EDA 
+**Numerical Variables**  
+* Salary  
+* Age  
+* Credit
+**Ordinal Categorical Variables**  
+* elevel
+**Nominal Categorical Variables**  
+* Zipcode  
+* Car  
+* Brand
+
+## Datatypes
+Datatypes from the categorical (ordinal or nominal) variables are incorrect: **elevel, car, zipcode and brand** datatypes should be changed to factor. 
+```{r}
+# change the datatype to factor 
+ComResp[, 'elevel'] <- as.factor(ComResp[, 'elevel'])
+ComResp[, 'car'] <- as.factor(ComResp[, 'car'])
+ComResp[, 'zipcode'] <- as.factor(ComResp[, 'zipcode'])
+ComResp[, 'brand'] <- as.factor(ComResp[, 'brand'])
+
+str(ComResp)
+```
+
+### add labels
+also we can add the corresponding labels to each categorical variable
+```{r}
+# list of labels of elevel
+ed_level_labels = c("Less than High School Degree", "High School Degree", "Some College","4-Year College Degree",
+             "Master's, Doctoral or Professional Degree")
+# create a new column 'elevelLabeled', copy of elevel with values remaped
+ComResp$elevelLabeled <- mapvalues(ComResp$elevel, from=c(0:4), to=ed_level_labels)
+
+cars_labels = c("BMW", "Buick", "Cadillac", "Chevrolet", "Chrysler", "Dodge", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Lincoln", "Mazda", "Mercedes Benz", "Mitsubishi", "Nissan", "Ram", "Subaru", "Toyota", "None of the above")
+ComResp$carLabeled <- mapvalues(ComResp$car, from=c(0:19), to=cars_labels)
+
+zipcode_labels = c("New England", "Mid-Atlantic", "East North Central", "West North Central", "South Atlantic", "East South Central", "West South Central", "Mountain", "Pacific")
+ComResp$zipcodeLabeled <- mapvalues(ComResp$zipcode, from=c(0:8), to=zipcode_labels)
+
+brands_labels = c("Acer", "Sony")
+ComResp$brandLabeled <- mapvalues(ComResp$brand, from=c(0:1), to=brands_labels)
+```
+
+the Skim function gives us a great overview of the dataset
+```{r}
+skim(ComResp)
+```
+
+## Missing values and NA ?
+* No missing values
+
+
+## Plots of each variables. 
+
+### 1. Salary 
+
+Survey Questions and Response Key  
+1) What is your yearly salary, not including bonuses?. Respondents enter numeric value
+
+* **This is a numerical variable. **
+
+```{r}
+summary(ComResp$salary)
+```
+
+```{r fig.height=2.5, fig.width=6}
+ggplot( ComResp, aes(x=salary)) + theme_bw()+
+  geom_histogram(color = 'black', fill = '#FF6620', binwidth = 10000)+
+  labs(title = "Salary Distribution", x="Salary") + 
+  geom_vline(aes(xintercept=mean(salary)), color="blue", linetype="dashed", size=1)  # adds the mean
+```
+
+### 2. Age
+
+Survey Questions and Response Key  
+2) What is your age?. Respondents enter numeric value
+
+* ** This is a Numerical Variable**
+
+```{r}
+summary(ComResp$age)
+```
+
+```{r fig.height=2.5, fig.width=6}
+ggplot( ComResp, aes(x=age)) + theme_bw()+
+  geom_histogram(color = 'black', fill = 'yellow', binwidth = 10)+
+  labs(title = "Age Distribution", x="Age") +
+  geom_vline(aes(xintercept=mean(age)), color="blue", linetype="dashed", size=1)  # adds the mean
+```
+> in general the customers have 30 to 70 years old. 
+
+### 3. elevel - Education Level 
+
+3) What is the highest level of education you have obtained?. Respondents select from the following 5 choices:  
+Value : Description  
+0 : Less than High School Degree  
+1	: High School Degree  
+2 : Some College  
+3 : 4-Year College Degree  
+4 : Master's, Doctoral or Professional Degree  
+
+* **This is a categorical ordinal variable**
+
+```{r}
+# print the head just to verify everything is correct
+head(ComResp)
+```
+
+```{r}
+# magins of the plot
+# mar: A numerical vector of the form c(bottom, left, top, right) which gives 
+# the number of lines of margin to be specified on the four sides of the plot. 
+# The default is c(5, 4, 4, 2) + 0.1.
+par(mar=c(3.5,10.5,3,1)+0.1)
+
+counts <- table(ComResp$elevelLabeled)
+
+# finally a Simple Horizontal Bar Plot with Added Labels
+barplot(counts, main="Education Levels Distribution", horiz=TRUE, names.arg=ed_level_labels, cex.names=0.6, las=2)
+```
+> In general the education level of customers is very homogeneous. 
+
+
+### 4. Car 
+
+4) What is the make of your primary car?. Respondents select from the following 20 choices:	
+Value : Description
+1 : BMW  
+2 : Buick  
+3 : Cadillac  
+4 : Chevrolet  
+5 : Chrysler  
+6 : Dodge  
+7 : Ford  
+8	: Honda  
+9	: Hyundai  
+10	: Jeep  
+11	: Kia  
+12	: Lincoln  
+13	: Mazda  
+14	: Mercedes Benz  
+15	: Mitsubishi  
+16	: Nissan  
+17	: Ram  
+18	: Subaru  
+19	: Toyota  
+20	: None of the above  
+
+* **this is a Nominal categorical variable**
+
+
+```{r}
+# Simple Horizontal Bar Plot with Added Labels
+par(mar=c(3,7.5,3,1)+0.1)
+# mar: A numerical vector of the form c(bottom, left, top, right) which gives 
+# the number of lines of margin to be specified on the four sides of the plot. 
+# The default is c(5, 4, 4, 2) + 0.1.
+
+Car_counts <- table(ComResp$carLabeled)
+
+barplot(Car_counts, main="Car's Brands Distribution", horiz=TRUE, names.arg=cars_labels, cex.names=0.6, las=1,)
+```
+
+> There is no preffered car's brand. the chocices are very homogeneous. 
+
+
+
+### 5. zipcode
+
+5) What is your zip code?. Respondents enter zip code, which is captured as 1 of the following 9 regions in the U.S.  
+Value :	Region  
+0 :	New England  
+1 :	Mid-Atlantic  
+2 :	East North Central  
+3 :	West North Central  
+4 :	South Atlantic  
+5 :	East South Central  
+6 :	West South Central  
+7 :	Mountain  
+8 :	Pacific  
+
+* **This is a categorical Nominal variable**
+
+```{r fig.height=5, fig.width=6}
+# Simple Horizontal Bar Plot with Added Labels
+par(mar=c(3,7.5,3,1)+0.1)
+# mar: A numerical vector of the form c(bottom, left, top, right) which gives 
+# the number of lines of margin to be specified on the four sides of the plot. 
+# The default is c(5, 4, 4, 2) + 0.1.
+
+zipcode_counts <- table(ComResp$zipcodeLabeled)
+
+barplot(zipcode_counts, main="ZipCode's Distribution", horiz=TRUE, names.arg=zipcode_labels, cex.names=0.6, las=1,)
+```
+
+### 6. Credit
+
+6) What amount of credit is available to you?. Respondents enter numeric value.
+
+* **Quantitative variable** 
+
+```{r}
+summary(ComResp$credit)
+```
+
+```{r  fig.height=2.5, fig.width=6}
+ggplot( ComResp, aes(x=credit)) + theme_bw()+
+  geom_histogram(color = 'black', fill = '#FF6620', binwidth = 10000)+
+  labs(title = "Credit Distribution", x="Salary") + 
+  geom_vline(aes(xintercept=mean(credit)), color="blue", linetype="dashed", size=1)  # this line adds the mean
+```
+
+### 7. brand
+
+7) Which brand of computers do you prefer?. Respondents select from the following 2 choices:  
+Value : Description  
+0	: Acer  
+1	: Sony  
+
+> this is our **Target variable.**
+
+```{r}
+brand_table <- table(ComResp$brand)
+
+barplot(brand_table, 
+        col = rainbow(2), 
+        names.arg = c("Acer", "Sony"))
+```
+
+
+
+
+
+
+
+## Normalization
+
+The formula for a min-max normalization is:
+$$(X – min(X))/(max(X) – min(X))$$
+For each value of a variable, we simply find how far that value is from the minimum value, then divide by the range. To implement this in R, we can define a simple function and then use lapply to apply that function to whichever columns in the dataset:
+
+```{r}
+#define Min-Max normalization function
+min_max_norm <- function(x) { 
+  (x - min(x)) / (max(x) - min(x))
+  }
+```
+
+```{r}
+#apply Min-Max normalization to the numerical variables
+ComResp_norm <- as.data.frame(lapply(ComResp[c('salary','age','credit')], min_max_norm))
+#print structure
+str(ComResp_norm)
+#summary
+summary(ComResp_norm)
+```
+
+The result looks great, all the numerical variables from 0 to 1, and also they are very symmetric. 1Q is close to 0.25, Mean ~ 0.5 and 3Q ~ 0.75.  
+But notice that all the rest of the variables were dropped out. They must be added manually. 
+```{r}
+ComResp_norm$elevel <- ComResp$elevel 
+ComResp_norm$car <- ComResp$car
+ComResp_norm$zipcode <- ComResp$zipcode
+ComResp_norm$brand <- ComResp$brand
+
+#ComResp_norm$elevelLabeled <- ComResp$elevelLabeled 
+#ComResp_norm$carLabeled <- ComResp$carLabeled
+#ComResp_norm$zipcodeLabeled <- ComResp$zipcodeLabeled
+#ComResp_norm$brandLabeled <- ComResp$brandLabeled
+
+str(ComResp_norm)
+```
+ 
+
+# Train the Models
+
+## Train/Test Split
+```{r}
+# define an 75%/25% train/test split of the dataset
+inTraining <- caret::createDataPartition(ComResp_norm$brand, p = .75, list = FALSE)
+training <- ComResp_norm[inTraining,]
+testing <- ComResp_norm[-inTraining,]
+```
+
+## Models
+
+### GBM1 - Stochastic Gradient boosting ()
+```{r}
+fitControl_gbmFit1 <- trainControl(## 10-fold CV
+                           method = "repeatedcv",
+                           number = 5,
+                           ## repeated ten times
+                           repeats = 5)
+```
+
+```{r}
+set.seed(123)
+gbmFit1 <- train(brand ~ ., ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variablesin the dataframe
+                 data = training, 
+                 method = "gbm", 
+                 trControl = fitControl_gbmFit1,
+                 ## This last option is actually one for gbm() that passes through
+                 verbose = FALSE)
+gbmFit1
+```
+
+```{r}
+varImp(gbmFit1)
+```
+
+### GBM2 - Stochastic Gradient boosting  K-10
+```{r}
+fitControl_gbmFit2 <- trainControl(## 10-fold CV
+                           method = "repeatedcv",
+                           number = 10,
+                           ## repeated ten times
+                           repeats = 5)
+
+## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variables in the dataframe
+gbmFit2 <- train(brand ~ .,            
+                 #brandLabeled ~ ., 
+                 #data = training_reduced, # with the redued dataset
+                 data = training, 
+                 method = "gbm", 
+                 trControl = fitControl_gbmFit2,
+                 ## This last option is actually one for gbm() that passes through
+                 verbose = FALSE)
+gbmFit2
+varImp(gbmFit2)
+```
+
+### RF1 - repeatedcv
+```{r}
+#10 fold cross validation
+fitControl_rf1 <- trainControl(method = "repeatedcv",
+                               number = 5, 
+                               repeats = 5)
+
+#train Random Forest Regression model with a tuneLenght = 5 (trains with 1 mtry value for RandomForest)
+rfFit1 <- train(brand ~.,  #brandLabeled ~., 
+                data = training,
+                method = "rf", 
+                trControl=fitControl_rf1, 
+                tuneLength = 5)
+
+rfFit1 
+varImp(rfFit1)
+```
+
+
+### RF2 - random search
+```{r}
+#10 fold cross validation
+fitControl_rf2 <- trainControl(method = "repeatedcv", 
+                               number = 10,
+                               repeats = 5,
+                               search = 'random')
+
+rfFit2 <- train(brand ~.,  
+                data = training,  # training performed in the full dataset
+                method = "rf", 
+                trControl = fitControl_rf2)
+
+rfFit2 
+varImp(rfFit2)
+```
+
+```{r}
+plot(varImp(rfFit2))
+```
+
+
+### RF3 - Mtry  
+```{r}
+#10 fold cross validation
+fitControl_rf3 <- trainControl(method = "repeatedcv", 
+                               number = 10, 
+                               repeats = 3,
+                               search = 'random' )
+
+mtry <- sqrt(ncol(training))  # training_reduced 
+metric <- "Accuracy"
+
+rfFit3 <- train(brand ~.,  #brandLabeled ~., 
+                data = training, # data = training_reduced, 
+                method = "rf", 
+                metric=metric, 
+                tuneLength=15,
+                trControl = fitControl_rf3)
+
+print(rfFit3) 
+plot(rfFit3)
+varImp(rfFit3)
+```
+
+```{r}
+plot(varImp(rfFit3))
+```
+
+
+### C50
+```{r  fig.height=30, fig.width=30}
+#tree_mod <- C5.0(x = train_data[, vars], y = train_data$Status)
+#c50Fit <- C5.0( x= training_reduced[,c('salary','age')], y= training_reduced$brandLabeled)
+c50Fit <- C5.0( x= training[,c('salary','age','elevel','car','zipcode','credit')], y= training$brand)
+summary(c50Fit)
+plot(c50Fit)
+varImp(c50Fit)
+```
+
+### save the MODELS!
+[ejemplo de uso](https://machinelearningmastery.com/finalize-machine-learning-models-in-r/)
+```{r}
+saveRDS(gbmFit1, './gbmFit1.rds')
+saveRDS(gbmFit2, './gbmFit2.rds')
+saveRDS(rfFit1, './rfmFit1.rds')
+saveRDS(rfFit2, './rfmFit2.rds')
+saveRDS(rfFit3, './rfmFit3.rds')
+saveRDS(c50Fit, './c50Fit.rds')
+```
+
+
+## Predictions on the Complete Survey - (Ground Truth)
+```{r}
+print('GBM1')
+brand_prediction_GBM <- predict(gbmFit1, testing)   # does the prediction predict(model, testData)
+postResample(brand_prediction_GBM, testing$brand)  # After making the predictions using the 
+
+print('GBM2')
+brand_prediction_GBM <- predict(gbmFit2, testing)   # does the prediction predict(model, testData)
+postResample(brand_prediction_GBM, testing$brand)  # After making the predictions using the 
+#brand_prediction_GBM <- predict(gbmFit2, testing_reduced)   # does the prediction predict(model, testData)
+#postResample(brand_prediction_GBM, testing_reduced$brandLabeled)  # After making the predictions using the test set use postResample() to assess the metrics of the new predictions compared to the Ground Truth 
+
+print('RF1')
+brand_prediction_RF1 <- predict(rfFit1, testing)
+postResample(brand_prediction_RF1, testing$brand)
+#brand_prediction_RF1 <- predict(rfFit1, testing_reduced)
+#postResample(brand_prediction_RF1, testing_reduced$brandLabeled)
+
+print('RF2')
+brand_prediction_RF2 <- predict(rfFit2, testing)
+postResample(brand_prediction_RF2, testing$brand)
+#brand_prediction_RF2 <- predict(rfFit2, testing_reduced)
+#postResample(brand_prediction_RF2, testing_reduced$brandLabeled)
+
+
+print('RF3')
+brand_prediction_RF3 <- predict(rfFit3, testing)
+postResample(brand_prediction_RF3, testing$brand)
+#brand_prediction_RF3 <- predict(rfFit3, testing_reduced)
+#postResample(brand_prediction_RF3, testing_reduced$brandLabeled)
+
+print('C5.0')
+brand_prediction_c50 <- predict(c50Fit, testing)
+postResample(brand_prediction_c50, testing$brand)
+#brand_prediction_c50 <- predict(c50Fit, testing_reduced)
+#postResample(brand_prediction_c50, testing_reduced$brandLabeled)
+```
+
+
+### Select a model
+Based on the results of the predictions, the bests models are:
+
+> "RF2"   > rfFit2  > Accuracy: 0.9296686  
+> "RF3"   > rfFit3  > Accuracy: 0.9292643  
+> "GBM2"  > gbmFit2 > Accuracy: 0.9288601  
+
+### Remove redundant data
+Based on the result of the varImp(rfFit2) the most important features are:  
+* Salary
+* Age
+* credit
+
+So we can remove the rest of the variables to improve performance and reduce computational costs. 
+```{r}
+ComResp_norm_reduced <- ComResp_norm #creates a copy of the DF
+ComResp_norm_reduced$elevel <- NULL  #removes the elevel variable
+ComResp_norm_reduced$car <- NULL
+ComResp_norm_reduced$zipcode <- NULL
+ComResp_norm_reduced$brand <- NULL  #as we have the brandLabeled, this is useless
+```
+
+In the training I forgot to add the labels to the brand, and it's useful... 
+```{r}
+brands_labels = c("Acer", "Sony")
+ComResp_norm_reduced$brandLabeled <- mapvalues(ComResp_norm$brand, from=c(0:1), to=brands_labels)
+```
+
+
+```{r}
+str(ComResp_norm_reduced)
+```
+
+just to check if everything still nice... train again the RF2 with the reduced dataset
+```{r}
+# train/test split of the dataset
+inTraining_reduced <- createDataPartition(ComResp_norm_reduced$brandLabeled, p = .75, list = FALSE)
+training_reduced <- ComResp_norm_reduced[inTraining_reduced,]
+testing_reduced <- ComResp_norm_reduced[-inTraining_reduced,]
+
+# fitControl_rf2 <- is the same than above
+
+rfFit2_reduced <- train(brandLabeled ~.,  
+                data = training_reduced, # the dataset reduced 
+                method = "rf", 
+                trControl = fitControl_rf2)
+
+rfFit2_reduced 
+varImp(rfFit2_reduced)
+```
+
+```{r}
+predictions_reduced <- predict(rfFit2_reduced, testing_reduced)
+summary(predictions_reduced)
+confusionMatrix(predictions_reduced, testing_reduced$brandLabeled)
+```
+
+
+### save the MODELS! 2
+
+```{r}
+saveRDS(rfFit2_reduced, './rfFit2_reduced.rds')
+```
+
+
+
+# Incomlpete Survey
+
+## Load CSV - Incomplete 
+```{r}
+path_to_file <- "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task2:Classification.in.R/SurveyData/SurveyIncomplete.csv"
+
+IncompleteResp <- read.csv(path_to_file)
+
+str(IncompleteResp) # with srt() we can see the structure of the dataframe
+```
+
+## Drop Unnecesary data
+the first thing I will do is remove the unnecessary data. Two main groups:  
+- from feature selection >> remove(elevel, car, zipcode, and credit)  
+- and i will remove also the brand column. It should be empty, but actually has inconsistent data: some 'ones' at the beginin and then full of 'zeros'. Will remove it and the main task of this part will be guessing them. 
+
+```{r}
+IncompleteResp_reduced <- IncompleteResp #creates a copy of the DF
+IncompleteResp_reduced$elevel <- NULL
+IncompleteResp_reduced$car <- NULL
+IncompleteResp_reduced$zipcode <- NULL
+IncompleteResp_reduced$brand <- NULL 
+
+str(IncompleteResp_reduced) #take a look to the reduced DF
+```
+
+## EDA 
+```{r}
+skim(IncompleteResp_reduced)
+```
+
+- no missing values.
+
+- from a fast and simple comparative of the Quantiles ans mean, Salady and Age from the complete and incomplete survey are very similar!. 
+>> would be nice to plot two histograms overlayed, comparing the distributions. 
+
+
+### Normalization
+```{r}
+#apply Min-Max normalization to the numerical variables
+IncompleteResp_reduced_norm <- as.data.frame(lapply(IncompleteResp_reduced[c('salary','age','credit')], min_max_norm))
+str(IncompleteResp_reduced_norm)
+```
+
+
+## Train/Test Split.
+I this case I want to guess the brand choice, out target variable, from the *Incomplete Survey*. I don't have this information, so it's useless to do the train/test split. In this case the entire set is used to make predictions. 
+
+## Load the model
+will load the saved copy of the model: **RF2_reduced**
+```{r}
+super_model <- readRDS("./rfFit2_reduced.rds")
+print(super_model)
+```
+
+
+## Guessing!
+
+I'm using the RF2 to guess the brand choice of the incomplete survey. 
+```{r}
+guess <- predict(super_model, IncompleteResp_reduced_norm)
+summary(guess)
+plot(guess)
+```
+
+
+
+# Analysis
+
+## Samples Analisis
+A sample is just a part of a population. It is important to compare the distribution of samples in the survey. 
+
+### Salary
+```{r}
+options(scipen = 999) # removes scientific notation
+ggplot(ComResp, aes(x=salary)) +
+    geom_density(fill="#69b3a2", color="red") + 
+    ggtitle("Salary - Complete survey")
+
+ggplot(IncompleteResp, aes(x=salary)) +
+    geom_density(fill="#69b3a2", color="blue") + 
+    ggtitle("Salary - Incomplete survey")
+
+```
+
+### Age
+```{r}
+options(scipen = 999) # removes scientific notation
+ggplot(ComResp, aes(x=age)) +
+    geom_density(fill="#69b3a2", color="red") + 
+  ggtitle("Age - Complete survey")
+
+ggplot(IncompleteResp, aes(x=age)) +
+    geom_density(fill="#69b3a2", color="blue") + 
+  ggtitle("Age - Incomplete survey")
+```
+
+
+### Credit
+```{r}
+options(scipen = 999) # removes scientific notation
+
+ggplot(ComResp, aes(x=credit)) +
+    geom_density(fill="#69b3a2", color="red") + 
+    ggtitle("Credit - Complete survey")
+
+ggplot(IncompleteResp, aes(x=credit)) +
+    geom_density(fill="#69b3a2", color="blue") + 
+  ggtitle("Credit - Incomplete survey")
+```
+
+
+
+
+## Analysis of Proportions  
+
+* Guessed Proportion of Acer/Sony
+
+```{r}
+coso <- summary(guess)
+guess_DF <- as.data.frame(coso) 
+#head(guess_DF)
+
+# calculates the proportion of sony 
+proportion_guessed_sony = guess_DF[1,1]/guess_DF[2,1]
+#proportion_guessed_sony
+
+# acer = 1 - sony
+proportion_guessed_acer = 1- proportion_guessed_sony
+#proportion_guessed_acer
+
+# add those values to a DF
+vec <- c(proportion_guessed_acer, proportion_guessed_sony) 
+guess_DF$prop_guess <- vec
+
+
+guess_DF$coso <- NULL  # elimino esta column temporal que no uso. 
+head(guess_DF)
+```
+
+* True Proportion of Acer/Sony
+
+```{r}
+coso2 <- summary(ComResp$brandLabeled)
+trueProportion_DF <- as.data.frame(coso2) 
+#head(trueProportion_DF)
+proportion_true_sony = trueProportion_DF[1,1]/trueProportion_DF[2,1]
+#proportion_true_sony
+proportion_true_acer = 1-proportion_true_sony
+#proportion_true_acer
+
+# add those values to a DF
+vec <- c(proportion_true_acer, proportion_true_sony) 
+guess_DF$prop_true <- vec
+
+allValues <- c(proportion_true_acer, proportion_guessed_acer, proportion_true_sony, proportion_guessed_sony)
+
+head(guess_DF)
+```
+
+
+```{r}
+proportion_true/proportion_guessed
+```
+
+```{r}
+# Increase margin size
+par(mar=c(3,8,1,1)) #bottom, left, top, right respectively.
+
+barplot(allValues,
+        col = c("lightblue", "mistyrose", "lightblue", "mistyrose"),
+        horiz = TRUE, 
+        names.arg = c("True Acer", "Guessed Acer", "True Sony", "Guessed Sony"), 
+        las = 2,
+        xlab="Proportion")
+```
+
+
+
+
+
+> The model used to guess the proportion of brand choice had an accuracy of 0.9182920 wich is good. 
+> Both proportions are very similar, a difference of 0.02%. 
+> We will never know the real brand selection of the customers of the incomplete survery. But the model trained to predict the brand choice is quite accurate.  
+
+
+
+
+# DUDAS
+
+- compare the distributions of the variables used to do the guesses with the ones used to train the model... are they similar?.
+    - plot two histograms from different DF overlayed?
+
+- if the population of both surveys are similar, then check if the proportion of the ground truth brand selection is similar with the proportion of the guessed selection. Do a graph coparing them. 
+
+- it's not unsupervised learning. this is another thing. in this case we used labeled data to train a model. we got nice values of accuracy in our model and then we used this model to make guesses. nobody knows the correct answer, they are guesses based on the trained model, and it's accuracy depends on the similarity of both populations. it's like a model trained to predict fraud in online purchases, nobody knows in advance what the client will do. But  we can train some predictive models with known past history, and based on some specific behaviors we can rise the alarm and be on guard. another example is the self driving cars: we can train a model to detect traffic lights, other cars, cyclists, etc. but when the model is loaded and the car is moving it's impossible to confirm every thing the car sees... we must belive in his guesses. 
+
+      
+- Kappa. 
+    if unbalanced data, take care of kappa. 
+
+- What If i have mixed input variables?. https://machinelearningmastery.com/feature-selection-with-real-and-categorical-data/
+
+
+
+
+
+- how to bind two columns with different dimensions? 
+  fill the empty spaces withs NAN ??
+  pick 5000 measures randomly?
+
+- Explain the importance of each feature used in the model and support it with quantitative evidence.
+  What does it means?
+  
+
+
+
+
+
+
+
