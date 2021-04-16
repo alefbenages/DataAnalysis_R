@@ -2,9 +2,9 @@
 title: 'REPORT: CUSTOMER BRAND PREFERENCES'
 author: "Ale F. Benages"
 date: "04/15/2021"
-output:   html_document
-#  html_document: 
-#    toc: yes
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 # Introduction

@@ -463,7 +463,9 @@ rfFit3 <- readRDS ('./Models/rfmFit3.rds')
 c50Fit <- readRDS ('./Models/c50Fit.rds')
 ```
 
-
+```{r}
+plot(varImp(rfFit2))
+```
 
 
 
