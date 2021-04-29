@@ -1,0 +1,212 @@
+---
+title: "Multiple Regression in R"
+author: "Ale F. Benages"
+date: "4/27/2021"
+output: html_document
+---
+
+
+# Intro  
+
+## Task Description
+The objectives of the task are: to analyze historical data to predict the sales of four different kind of products either to assess the effects of customer and service reviews on the expenditures. 
+Multi Regression technique was used to build the machine learning models for these analyses. 
+Firstly was done the pre processing of the existing product dataset, then the best model for the provided data set  was selected and finally it was used to predict the sales volume of the new products list.
+
+### Goals:  
+- Predict sales of four different product types: PC, Laptops, Netbooks and Smartphones  
+- Assess the impact of service reviews and customer reviews on sales of different product types  
+
+
+# Results
+
+### Main Conclusions  
+The existing product dataset contained 80 rows, a reasonable number to make predictions, after the pre processing remained 65. But when those observations were divided into the 12 product types, finally it resulted around (if it were a perfectly balanced dataset) 6 observations per product. This amount of data per product is not enough to produce statistically representative observations. **All the observations and conclusions in this document, shouldn't be used to produce data driven decisions**. Getting more data is the obvious solution, but if it's not possible, perhaps organizing the products into bigger categories (example computers, including: Laptop, Netbook, PC) would increase the number of rows per category.  
+
+## Sells Prediction
+The results of predicting the volume sales for the products of interest weren't satisfying. Huge differences were founded between the historical values and the predicted ones.
+In terms of Smartphone sells, the prediction seems to be suitable but the reader must be aware that it was made on a very little amount of data (just 2 to 5 rows for each product, not enough to be statistically relevant).**Not enough data to be used with the most typical machine learning models, perhaps more advanced statistics methods could achieve better conclusions.**.
+
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/predictions2.png)
+
+
+
+## Sales by Service Review
+The same disclaimer applies to this analysis, because those results are based on the same tiny amount of data  and **it's not statistically representative.** All this analysis was made over the _exisitingprod...2017.csv_ 
+
+Anyway, filtering by **Positive and Negative Service Review, and by products of interest**, it shows some basic ideas for general understanding.  
+
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/SellsPosSR.png) 
+
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/SellsNegSR.png)
+
+### Some Conclusions:
+- **Smartphones** were the best seller and best rated products, despite having some negative reviews.
+- Interesting findings were done with laptops, even having more negative than positive service reviews, the selling volume remained constant. 
+- **Netbooks**, in both graphs performed poorly: they showed a very low volume of sells and more negative than positive reviews. 
+- **PC** described a similar behavior, low sells, and almost no reviews. 
+
+
+## Impact of customer reviews on sales of different product types 
+
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/x5starReview.png)
+- **Smartphones** had the highest amount of _x5 Star reviews_ than any other product. Seemed like people really enjoyed rating the Smartphones they bought. 
+- **PC** and **Netbooks** had almost no reviews. 
+
+
+# 1. Data  
+Two dataframes available:  
+- existingproductattributes2017.csv  
+- newproductattributes2017.csv
+
+Both contained basically the same info, the main difference was that the first file, _existingproducts...,_ contained the historical data used to fit the model. The second file, _newproducts..._ was used to make predictions over the Output feature.
+
+#### < Input Variables:
+##### Categorical Variables  
+- ProductType,  
+- ProductNum,  
+- x5StarReviews,  
+- x4StarReviews,  
+- x3StarReviews,  
+- x2StarReviews,  
+- x1StarReviews,  
+- PositiveServiceReview,  
+- NegativeServiceReview  
+
+##### Numerical Variables      
+- Price,  
+- Recommendproduct,  
+- BestSellersRank,  
+- ShippingWeight,  
+- ProductDepth,  
+- ProductWidth,  
+- ProductHeight,  
+- ProfitMargin, 
+
+#### > Output Var:  
+- Volume
+
+# Historical Data (existingproductattributes2017.csv)
+
+## 2. Pre-Processing 
+Some pre-processing tasks were required:
+
+### 2.1 Adjust datatypes - Dummify
+
+The datatype of the feature **PrductType** was _char_, and it contained the different types of products: "PC", "Laptop", etc. Categorical variables may be used directly as predictors or predicted variables in a multiple regression model as long as they've been converted to binary values. In order to pre-process the sales data as needed we first needed to convert all factors or 'chr' classes to binary features that contained ‘0’ and ‘1’ classes.  This was done with the function _fastDummies::dummy_cols()_. So the ProductType column produced 12 new columns, but I focused only into the first 4 (products of interest) dismissing the rest:
+
+-ProductType_Laptop  
+-ProductType_Netbook  
+-ProductType_PC  
+-ProductType_Smartphones 
+
+-ProductType_Accessories  
+-ProductType_Display  
+-ProductType_ExtendedWarranty   
+-ProductType_GameConsole  
+-ProductType_Printer  
+-ProductType_PrinterSupplies  
+-ProductType_Software  
+-ProductType_Tablet  
+
+
+**xXStarReviews** and **Pos/NegServiceReview**, if condensed in just one variable, would have been Categorical Variables, but spited like they were, into their inner values, they were considered **numerical variables**, because the category was already defined in the name.
+
+### 2.2 Duplicates
+There were no duplicated rows. 
+ 
+### 2.3 Handling Missing Values. 
+Some NAN's were founded at the feature _BestSellersRank_. The first trial was dropping them, and then, while training the models, I realized that the importance of this feature was relatively low. Also those rows contained no data about the 4 product types of interest. So finally I opted for keeping the first decision of removing the NAN's. It has no sense to predict any value for them because they wouldn't improve the overall result. 
+
+## 3. Analisis of Correlation 
+
+Correlation doesn't always imply causation. I started the analysis looking for the correlation between the relevant independent numerical variables and the dependent numerical variable (volume). 
+Some observations:  
+
+- _x5StarReview_ had a correlation of 1 with the output. It wasn't a desirable result, fitting models with highly correlated data tend to overfit them. The best solution was removing this feature, or at least from the data used to feed the machine learning models.  
+
+- _PositiveServiceReview, NegativeServiceReview, x4StarReview, x3StarReview, x2StarReview_ and _x1StarReview_ had a positive correlation with volume.  
+
+- The rest of the features showed a very low correlation with the dependent variable. 
+
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/overlap.png)
+
+## 4. Machine Learning Models
+
+### 4.1 Train/Test Split 
+Data had been splitted with a 75/25 ratio.
+
+### 4.2 Models
+List of (some of) tested models: (not in an specific order)
+
+a. Multiple linear regression model (MLR) 
+b. Multiple linear regression model with tuneGrid (MLR2)
+c. Support Vector Machines with Boundrange String Kernel (SVM)
+d. Support Vector Machines with Polynomial Kernel (SVM2)
+e. Conditional Inference Random Forest (RF)
+f. Parallel Random Forest (RF2)
+g. Gradient Boosting - eXtreme Gradient Boosting (GB)
+h. and some others..
+
+The name of the models referred to the variant of the algorithm. 
+
+All the models used pre processing methods to get the data normalized and centered. Also a re sampling Cross-Validated was performed (10 fold, repeated 3 times).  
+
+### 4.3 Selection criteria of the models was based on:  
+
+- **Models for regression problems.**  
+The selection of algorithms was focused on:  Multiple Regression, Support Vector Machine, Random Forest and Gradient Boosting. Then a variant from the [List of avilable models in CARET](https://topepo.github.io/caret/available-models.html) was chosen. 
+
+- **Reasonable processing time.**  
+To improve processing time, the library Multicore Parallel Processing(doMC) was used, reducing the required time remarkably.  Anyway some models, like GB and SVM2 were discarded because after some long hours of working didn't achieve any result. 
+
+- **Impossible results**  
+While making the predicting analysis, some models produced negative values of sells volume. This is impossible, nobody can sell negativly. So variants that give no negative values in the predictions (or at least with just a few and as close to zero as possible) were preferred. 
+
+- **Metric Error**  
+After all the context selection criteria, the final verdict was done taking into account the metric errors. As a good number of trained models were available, choosed a good combination of low RMSE and high R-square metrics. 
+
+The big picture of metrics error with all the models:
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/models_general.png)
+And then focusing on the most promising:
+![](/home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/images/models_specific.png)
+
+### Results
+The result is that **Parallel Random Forest (RF2)** was the algorithm that produced the best results.  
+
+- MAE: 917.8809
+- RMSE: 459.8380
+- R2: 0.9275054
+
+
+# New Data (newproductattributes2017.csv)
+
+## 5. Pre-Processing
+The same pre-processing methods and criteria selection for dropping rows/columns were applied to this new dataset:
+- Adjusting datatypes
+- Dummies
+- missing values criteria
+- Removing the same columns.
+
+## 6. Guessing Volume 
+Guessing Sells Volume on the dataset of new products was the last tasks. The selected model was **Parallel Random Forest (RF2)** and it used the full dataset of new products to make predictions. It has no sense to divide it into training and testing, since there is no data (in this dataset) to contrast the obtained result. 
+But the comparison can be made between the predictions and the historical sells values:
+
+- **Smartphone**   
+Sells:  1808  
+Predicted:  1974  
+
+- **Netbook**  
+Sells:  92  
+Predicted:  1433  
+
+- **Laptop**  
+Sells:  516  
+Predicted:  305  
+
+- **PC**  
+Sells:  32  
+Predicted:  739
+
+As mentioned in the results section: a huge difference between the historical and guessed values was observed, 
+as a result of the small amount of observations. 

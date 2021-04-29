@@ -1,0 +1,819 @@
+---
+title: "Multiple_Regression"
+author: "Ale F. Benages"
+date: "4/19/2021"
+output: html_document
+---
+
+# Intro
+You have been asked to predict the sales in four different product types while assessing the effects service and customer reviews have on sales. You'll be using Regression to build machine learning models for this analyses. Once you have determined which one works better on the provided data set, you will be asked to predict the sales of four product types from the new products list and prepare a report of your findings.
+
+> Output Var: Volume
+
+
+
+# libraries
+```{r}
+library(skimr) # to get a fast overview of all the variables. Fast&Dirty EDA
+library(caret, ggplot2)
+library(fastDummies) # to convert categorical features into dummy features
+library(plyr)
+library(corrplot) # to create a heatmap with correlations
+#library(tidyverse)
+library(tictoc)  # to get execution time
+
+library(doMC) # configure multicore for parallel processing
+
+```
+
+
+# Load CSV - ExsProds
+```{r}
+path_to_file <- "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/productattributes/existingproductattributes2017.csv"
+
+ExsProds <- read.csv(path_to_file)
+
+str(ExsProds) # with srt() we can see the structure of the dataframe
+head(ExsProds) # with head we get a similar output but with the classic dataframe structure
+```
+# EDA 
+```{r}
+skim(ExsProds)
+```
+
+## Datatypes 
+
+Also change the datatypes of the categorical variable from char to factor, and add labels. 
+```{r}
+# change the datatype to factor 
+ExsProds[, 'ProductType'] <- as.factor(ExsProds[, 'ProductType'])
+
+#add the corresponding lables
+# ProductType_labels = c("Accesories", "Display", "ExtendedWarranty", "GameConsole", " Laptop", "Netbook", "PC", "Printer", "Printer Supplies", "Smartphone", "Software", "Tablet")
+# ExsProds$ProductType <- plyr::mapvalues(ExsProds$ProductType, from=c(1:12), to=ProductType_labels)
+
+# str(ExsProds)
+```
+
+### Type of variables  
+
+**Numerical Variables**  
+
+- Price
+- ShippingWeight, ProductDepth, ProductWidth, ProductHeight     
+- ProfitMargin
+- Volume
+- x5StarReviews, x4StarReviews, x3StarReviews, x2StarReviews, x1StarReviews
+- PositiveServiceReview, NegativeServiceReview 
+
+> **xXStarReviews** and **Pos/NegServiceReview**, if condensed in just one variable, would been Categorical Variables, but splited like that into their inner values, they are cosidered **numerical variables**, because the category is alredy defined in the name. 
+
+**Ordinal Categorical Variables**  
+- BestSellersRank
+
+**Nominal Categorical Variables** 
+- ProductNum
+- ProductType
+ 
+## Pre-Processing
+
+### dummify the categorical variable
+Categorical variables may be used directly as predictor or predicted variables in a multiple regression model as long as they've been converted to binary values. In order to pre-process the sales data as needed we first need to convert all factor or 'chr' classes to binary features that contain ‘0’ and ‘1’ classes.
+
+```{r}
+ExsProds <- fastDummies::dummy_cols(ExsProds)  #library::function
+str(ExsProds)
+```
+> the ProductType feature now is dummified, or splited into its inner values. 
+> Notice that this feature is "duplicated": the original list, and the new features. 
+> Notice also that now it became a **bigger** dataset, 29 features x 80 cols. 
+
+### Duplicates
+```{r}
+ExsProds[duplicated(ExsProds),]
+```
+No duplicates
+
+### Handling NAN's
+
+The skim function told that there are some NAN's in the _BestSellersRank_ feature. 
+
+There are many methods of addressing missing data, but the most secure is simply deleting any attribute that has missing information. In any attempt of fixing those NA or NAN's, the integrity of the dataset will be affected. 
+Only in cases where the dataset is very constrained and getting new data is difficult/expensive/inviable has sense to invest time and effort to replace the missing data with guessed data.
+
+```{r}
+ExsProds <- na.omit(ExsProds) # Using na.omit() to remove (missing) NA and NaN values
+
+any(is.na(ExsProds)) # check if there is any NA, NAN or missing values
+```
+
+### Drop Non Numerical data
+```{r}
+ExsProds_Clean <- ExsProds #creates a copy of the DF
+
+ExsProds$ProductType <- NULL 
+```
+
+## Drop not used features
+The Goal is, "predicting sales of four different product types:   
+- PC,  
+- Laptops,  
+- Netbooks and  
+- Smartphones  
+So drop also all the rest of the Product Types
+```{r}
+ExsProds$ProductType_Accessories <- NULL
+ExsProds$ProductType_Display <- NULL
+ExsProds$ProductType_ExtendedWarranty <- NULL 
+ExsProds$ProductType_GameConsole <- NULL
+ExsProds$ProductType_Printer <- NULL
+ExsProds$ProductType_PrinterSupplies <- NULL
+ExsProds$ProductType_Software <- NULL
+ExsProds$ProductType_Tablet <- NULL
+
+str(ExsProds)
+head(ExsProds)
+```
+Volume, 
+
+
+### Reorder the columns
+<!-- move the output feature to the end of the dataset, just to improve visualization.   -->
+<!-- ```{r} -->
+<!-- ExsProds[ , c("ProductNum", "Price", "x5StarReviews", "x4StarReviews", "x3StarReviews", "x2StarReviews", "x1StarReviews", "PositiveServiceReview", "NegativeServiceReview", "Recommendproduct", "BestSellersRank", "ShippingWeight", "ProductDepth", "ProductWidth", "ProductHeight", "ProfitMargin", "ProductType_Accessories", "ProductType_Display", "ProductType_ExtendedWarranty", "ProductType_GameConsole", "ProductType_Laptop", "ProductType_Netbook", "ProductType_PC", "ProductType_Printer", "ProductType_PrinterSupplies", "ProductType_Smartphone", "ProductType_Software", "ProductType_Tablet", "Volume")]   # Reorder columns by names -->
+<!-- ``` -->
+
+## Some Plots
+
+```{r}
+list_features <- colnames(ExsProds)
+
+for (i in list_features){
+  hist(ExsProds[,i], main = paste("Histogram of ",i), xlab = i)
+}
+```
+
+
+## Correlation
+While correlation doesn't always imply causation you can start your analysis by finding the correlation between the relevant independent variables and the dependent variable. 
+
+The cor() function to creates a correlation matrix that you can visualize to ascertain the correlation between all of the features.
+```{r}
+#select only the numerical features
+ExsProds_num_features <- ExsProds #creates a copy of the DF
+
+ExsProds_num_features$ProductNum  <- NULL
+ExsProds_num_features$ProductType_Laptop  <- NULL
+ExsProds_num_features$ProductType_Netbook  <- NULL
+ExsProds_num_features$ProductType_PC  <- NULL
+ExsProds_num_features$ProductType_Smartphone  <- NULL
+
+#str(ExsProds_num_features)
+
+correlationMatrix <- cor(ExsProds_num_features)
+```
+
+As the corrMatrix is very big and difficult to visualize, it's better to use a graph.
+```{r}
+# Adjust Margins
+#par(mar=c(3,1,5,1)) #bottom, left, top, right respectively.
+
+png(height=1200, width=1200, pointsize=25, file="overlap.png")
+
+corrplot(correlationMatrix, order = "hclust")
+```
+
+![]("//home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/productattributes/overlap.png")
+
+Also it's usefull to see the correlations only with the output Variable
+```{r}
+corr_to_Volume <- sort(apply(ExsProds,2, function(col)cor(col,ExsProds$Volume)), decreasing = TRUE)
+print(corr_to_Volume)
+```
+### Observrions from correlations:  
+- "Volume" is correlating perfectly with itself, that's why corr=1, but "x5StarReviews" also is correlating perfectly... this is an error? 
+- There is also a positive correlation between high rated reviews and volume of sells. 
+- Positive Service Review are more correlated with Volume. 
+- A negative correlation can be observed with the weight. As the weight of the product increase, the sells' volume decrease. 
+- price is also somehow negative correlated
+
+Other interesting things, not related with volume, and seen only in the DF with all the features:
+- is that the product with higher profit margin are the extended warranty. And accessories the least.
+- the highest correlated product with volume are the game consoles.  A positive correlation.
+
+### Remove Features
+**x5StarReview" can't have a correlation of 1. will make the models overfit. 
+```{r}
+ExsProds$x5StarReviews <- NULL
+```
+print again to check
+```{r}
+corr_to_Volume <- sort(apply(ExsProds,2, function(col)cor(col,ExsProds$Volume)), decreasing = TRUE)
+print(corr_to_Volume)
+```
+
+
+# Regression
+
+## Train/Test Split
+```{r}
+set.seed(123)
+
+# define an 75%/25% train/test split of the dataset
+inTraining <- caret::createDataPartition(ExsProds$Volume, p = .75, list = FALSE)
+training <- ExsProds[inTraining,]
+testing <- ExsProds[-inTraining,]
+```
+
+## Parametric Models
+### X MLR - Multiple linear regression model
+```{r}
+# configure multicore
+registerDoMC(cores=4)
+
+
+ctrl <- trainControl(
+  method = "repeatedcv", 
+  repeats = 3,
+  classProbs = TRUE, 
+#  summaryFunction = twoClassSummary
+)
+
+tic()
+model_MLR <- train(Volume ~ ., ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variablesin the dataframe
+               data = training ,
+               method = "lm", 
+               preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples.
+               trControl = ctrl
+               #,preProcess = c('scale')
+               )
+toc()
+
+model_MLR 
+print(varImp(model_MLR))
+plot(varImp(model_MLR))
+predictions_MLR <- predict(model_MLR, testing)
+summary(predictions_MLR)
+```
+
+
+According to this model the most important fetures are X4, -ServRev, X3, +ServRev, Prod_Width, Prod_Depth, BestSellersRank
+
+
+
+
+> The prediction has some negative values... but it's not possible to have negative volume sells..
+
+### L MLR2 - Multiple linear regression model
+Will try to force the solution so predicto values greater than zero.
+
+```{r}
+# configure multicore
+registerDoMC(cores=4)
+
+
+ctrl <- trainControl(
+  method = "repeatedcv",
+  repeats = 3,
+  classProbs = TRUE,
+#  summaryFunction = twoClassSummary
+)
+tunegrid = expand.grid(intercept = FALSE)
+
+tic()
+model_MLR2 <- train(Volume ~ ., ## define the input formula as "y~x1,x2...xn" OR "y~." for short here, "~" can be read as "is defined as", while the "." indicates all variablesin the dataframe
+               data = training ,
+               method = "lm",
+               preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples.
+               trControl = ctrl,
+               tuneGrid  = tunegrid
+               )
+toc()
+
+model_MLR2
+print(varImp(model_MLR2))
+plot(varImp(model_MLR2))
+predictions_MLR2 <- predict(model_MLR2, testing)
+summary(predictions_MLR2)
+```
+
+## NON-Parametric Models
+
+### SVM - Support Vector Machines with Boundrange String Kernel 
+https://topepo.github.io/caret/train-models-by-tag.html#support-vector-machines
+
+
+```{r}
+# configure multicore
+registerDoMC(cores=5)
+
+ctrl <- trainControl(
+  method = "repeatedcv", 
+  repeats = 3,
+  classProbs = TRUE, 
+#  summaryFunction = twoClassSummary
+)
+
+set.seed(123)
+tic()
+model_SVM <- train(
+  Volume ~ .,
+  data = training,
+  method = "svmLinear3",
+  preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples.
+  tuneLength = 15,
+  trControl = ctrl
+)
+toc()
+
+model_SVM
+ggplot(model_SVM)  # shows the relationship between the resampled performance values and the number of tunned parameters components
+
+varImp(model_SVM)
+plot(varImp(model_SVM))
+
+predictions_SVM <- predict(model_SVM, testing)
+summary(predictions_SVM)
+```
+> The prediction has some negative values... but it's not possible to have negative volume sells..
+
+### L- SVM2
+<!-- ```{r} -->
+<!-- # configure multicore -->
+<!-- registerDoMC(cores=5) -->
+
+<!-- ctrl <- trainControl( -->
+<!--   method = "repeatedcv",  -->
+<!--   repeats = 3, -->
+<!--   classProbs = TRUE,  -->
+<!-- #  summaryFunction = twoClassSummary -->
+<!-- ) -->
+
+<!-- set.seed(123) -->
+<!-- tic() -->
+<!-- model_SVM2 <- train( -->
+<!--   Volume ~ ., -->
+<!--   data = training, -->
+
+<!--   #method = "svmLinear2", -->
+<!--   method = "svmPoly", -->
+<!--   preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples. -->
+<!--   tuneLength = 15, -->
+<!--   trControl = ctrl -->
+<!-- ) -->
+<!-- toc() -->
+
+<!-- model_SVM2 -->
+<!-- #ggplot(model_SVM2) There are no tunning parameters -->
+<!-- plot(varImp(model_SVM2)) -->
+<!-- predictions_SVM2 <- predict(model_SVM2, testing) -->
+<!-- summary(predictions_SVM2) -->
+<!-- ``` -->
+
+
+### RF - Conditional Inference Random Forest
+https://topepo.github.io/caret/train-models-by-tag.html#random-forest
+
+```{r}
+# configure multicore
+registerDoMC(cores=6)
+
+ctrl <- trainControl(
+  method = "repeatedcv", 
+  repeats = 3,
+  classProbs = TRUE, 
+#  summaryFunction = twoClassSummary
+)
+
+set.seed(123)
+tic()
+model_RF <- train(
+  Volume ~ .,
+  data = training,
+  method = "cforest",
+  preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples.
+  tuneLength = 15,
+  trControl = ctrl
+)
+toc()
+model_RF
+ggplot(model_RF)
+plot(varImp(model_RF))
+predictions_RF <- predict(model_RF, testing)
+summary(predictions_RF)
+```
+
+### RF2 - Parallel Random Forest
+https://topepo.github.io/caret/train-models-by-tag.html#random-forest
+
+```{r}
+# configure multicore
+registerDoMC(cores=6)
+
+ctrl <- trainControl(
+  method = "repeatedcv", 
+  repeats = 3,
+  classProbs = TRUE, 
+#  summaryFunction = twoClassSummary
+)
+
+set.seed(123)
+tic()
+model_RF2 <- train(
+  Volume ~ .,
+  data = training,
+  method = "ranger",
+  preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples.
+  tuneLength = 15,
+  trControl = ctrl )
+toc()
+model_RF2
+ggplot(model_RF2)
+#plot(varImp(model_RF))
+predictions_RF2 <- predict(model_RF2, testing, interval = "confidence")
+
+
+summary(predictions_RF2)
+```
+```{r}
+#predict(my_model_name$finalModel, my_data, interval = "confidence")
+#predict(model_RF2$finalModel, testing, interval = "confidence")
+
+coef(model_RF2$finalModel, s = ridge.caret$bestTune$lambda)
+```
+
+
+
+
+### x Gradient Boosting - eXtreme Gradient Boosting
+https://topepo.github.io/caret/train-models-by-tag.html#random-forest
+
+<!-- ```{r} -->
+<!-- # configure multicore -->
+<!-- registerDoMC(cores=7) -->
+
+<!-- ctrl <- trainControl( -->
+<!--   method = "repeatedcv", -->
+<!--   repeats = 3, -->
+<!--   classProbs = TRUE, -->
+<!-- #  summaryFunction = twoClassSummary -->
+<!-- ) -->
+
+<!-- set.seed(123) -->
+<!-- tic() -->
+<!-- model_GB <- train( -->
+<!--   Volume ~ ., -->
+<!--   data = training, -->
+<!--   method = "xgbDART", -->
+<!--   preProc = c("center", "scale"),   ## Center and scale the predictors for the training set and all future samples. -->
+<!--   tuneLength = 15, -->
+<!--   trControl = ctrl -->
+<!-- ) -->
+<!-- toc() -->
+<!-- model_GB -->
+<!-- ``` -->
+
+
+
+
+### Compraring models
+How do these models compare in terms of their resampling results? The resamples function can be used to collect, summarize and contrast the resampling results. Since the random number seeds were initialized to the same value prior to calling `train}, the same folds were used for each model. To assemble them:  [link](https://cran.r-project.org/web/packages/caret/vignettes/caret.html)
+[How To plot the resamples](https://www.machinelearningplus.com/machine-learning/caret-package/#9ensemblingthepredictions)
+
+```{r}
+model_compare <- resamples(list(MLR = model_MLR, 
+                          MLR2 = model_MLR2, 
+                          SVM = model_SVM, 
+                          #SVM2 = model_SVM2, 
+                          RF = model_RF, 
+                          RF2 = model_RF2))
+summary(model_compare)
+
+scales <- list(x=list(relation="free"), y=list(relation="free"))
+bwplot(model_compare, scales=scales)
+```
+```{r}
+model_compare <- resamples(list(SVM = model_SVM, RF2 = model_RF2))
+summary(model_compare)
+
+scales <- list(x=list(relation="free"), y=list(relation="free"))
+bwplot(model_compare, scales=scales)
+```
+
+
+> use RF2
+
+
+# Load CSV - new_Products
+
+```{r}
+path_to_file <- "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/productattributes/newproductattributes2017.csv"
+
+NewProds <- read.csv(path_to_file)
+
+#str(NewProds) # with srt() we can see the structure of the dataframe
+skim(NewProds) # with head we get a similar output but with the classic dataframe structure
+```
+
+
+## Pre-processing
+must apply all the same operations
+
+### Dummyfy
+```{r}
+NewProds <- fastDummies::dummy_cols(NewProds)  #library::function
+#str(Newprods)
+```
+
+### Duplicates
+```{r}
+NewProds[duplicated(NewProds),]
+```
+
+### Handling NAN's
+
+```{r}
+any(is.na(NewProds)) # check if there is any NA, NAN or missing values
+```
+
+### Drop not used features
+
+```{r}
+# because it's non numerical
+NewProds$ProductType <- NULL 
+
+# because we focus our attention only in 4 products
+NewProds$ProductType_Accessories <- NULL
+NewProds$ProductType_Display <- NULL
+NewProds$ProductType_ExtendedWarranty <- NULL 
+NewProds$ProductType_GameConsole <- NULL
+NewProds$ProductType_Printer <- NULL
+NewProds$ProductType_PrinterSupplies <- NULL
+NewProds$ProductType_Software <- NULL
+NewProds$ProductType_Tablet <- NULL
+
+# because correlates perfectly with the feature
+NewProds$x5StarReviews <- NULL
+
+# because is what we want to predict
+NewProds$Volume <- NULL
+
+str(NewProds)
+head(NewProds)
+```
+
+
+
+## Guessing!
+
+I'm using the RF2 to guess the brand choice of the incomplete survey. 
+```{r}
+super_model <- model_RF2
+guess <- predict(super_model, NewProds)
+summary(guess)
+```
+
+```{r}
+guess = ifelse(guess < 0, 0, guess)  # convert all the negative values to 0
+summary(guess)
+```
+
+
+## Add the guess to the DF
+```{r}
+NewProds$Volume_guess <- guess
+
+str(NewProds)
+```
+
+## save the CSV's
+
+```{r}
+# row.names=FALSE if you don’t want R to export the row names to the CSV file
+write.csv(NewProds, "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/productattributes/NewProds.csv", row.names=FALSE)
+write.csv(ExsProds, "//home/ale/Dropbox/UBIQUM/3.DAwithR/Task3:MultipleRegressioninR/productattributes/ExsProds.csv", row.names=FALSE)
+```
+
+
+# Goals:
+## Predicting sales of four different product types: PC, Laptops, Netbooks and Smartphones
+```{r}
+library(dplyr)
+
+
+
+# sum of the volume of sells. 
+ExsProds_Laptop <- filter(ExsProds, ProductType_Laptop == '1')
+Laptop_vtas <- sum(ExsProds_Laptop$Volume)
+
+ExsProds_Netbook <- filter(ExsProds, ProductType_Netbook == '1')
+Netbook_vtas <- sum(ExsProds_Netbook$Volume)
+
+ExsProds_PC <- filter(ExsProds, ProductType_PC == '1')
+PC_vtas <- sum(ExsProds_PC$Volume)
+
+ExsProds_Smart <- filter(ExsProds, ProductType_Smartphone == '1')
+Smart_vtas <- sum(ExsProds_Smart$Volume)
+
+
+# sum of the predcted volume of sells. 
+NewProds_Laptop <- filter(NewProds, ProductType_Laptop == '1')
+Laptop_guess <- sum(NewProds_Laptop$Volume)
+
+NewProds_Netbook <- filter(NewProds, ProductType_Netbook == '1')
+Netbook_guess <- sum(NewProds_Netbook$Volume)
+
+NewProds_PC <- filter(NewProds, ProductType_PC == '1')
+PC_guess <- sum(NewProds_PC$Volume)
+
+NewProds_Smart <- filter(NewProds, ProductType_Smartphone == '1')
+Smart_guess <- sum(NewProds_Smart$Volume)
+
+
+paste('Laptop Vtas: ', Laptop_vtas)
+paste('Laptop Guess: ', Laptop_guess)
+paste('Netbook Vtas: ', Netbook_vtas)
+paste('Netbook Guess: ', Netbook_guess)
+paste('PC Vtas: ', PC_vtas)
+paste('PC Guess: ', PC_guess)
+paste('Smart Vtas: ', Smart_vtas)
+paste('Smart Guess: ', Smart_guess)
+```
+
+```{r}
+data_grouped <- as.matrix(data.frame(Smartphone = c (Smart_vtas, Smart_guess),
+                                     Netbook = c(Netbook_vtas, Netbook_guess),
+                                     Laptop = c(Laptop_vtas, Laptop_guess), 
+                                     PC = c(PC_vtas, PC_guess)))
+
+rownames(data_grouped) <- c("Sells", "Predicetd")
+
+barplot(data_grouped,                                  # Create grouped barchart
+        col = c("#1b98e0", "#353436"),
+        beside = TRUE,
+        xlab = "Products of interest",
+        ylab = 'Sells Volume',
+        main = "Sells Volume of Product of Interest")
+
+
+legend("topright",                                    # Add legend to barplot
+       legend = c("Sells", "Predicted"),
+       fill = c("#1b98e0", "#353436"))
+
+#png(height=300, width=300, pointsize=25, file="prediction.png")
+```
+
+
+
+## Assessing the impact services reviews and customer reviews have on sales of different product types
+grafico que muestra, los las ventas (numerical) de los productos (categorical), divididos en las diferentes clasificacione (Categorical)
+ - Heatmap  (x = prod, Y =  clasif, value = Volumen de vtas)
+ - Treemap (un cuadr x clasif [posit/neg], subdividido por los dif prod (el tamaño de las cajas es prop a las ventas))
+
+
+### POSITIVE/NEGATIVE SERVICE REVIEW
+```{r}
+# library
+library(treemap)
+
+# Sum the number of Positive/Negative Service Review each category of product recived. 
+#Laptop
+L_PR <- sum(ExsProds_Laptop$PositiveServiceReview)
+L_NR <- sum(ExsProds_Laptop$NegativeServiceReview)
+
+#netbook
+N_PR <- sum(ExsProds_Netbook$PositiveServiceReview)
+N_NR <- sum(ExsProds_Netbook$NegativeServiceReview)
+
+#Smartphone
+S_PR <- sum(ExsProds_Smart$PositiveServiceReview)
+S_NR <- sum(ExsProds_Smart$NegativeServiceReview)
+
+#PC
+P_PR <- sum(ExsProds_PC$PositiveServiceReview)
+P_NR <- sum(ExsProds_PC$NegativeServiceReview)
+
+# Create data
+group <- c("Laptop","Netbook","Smartphone","PC")
+value_PR <- c(L_PR, N_PR, S_PR, P_PR)
+value_NR <- c(L_NR, N_NR, S_NR, P_NR)
+
+data_PR <- data.frame(group,value_PR)
+data_NR <- data.frame(group,value_NR)
+
+ 
+# treemap
+treemap(data_PR,
+            index="group",
+            vSize="value_PR",
+        title=" Sells Volume by Positive Service Review",
+        palette = "Set1"
+            )
+
+treemap(data_NR,
+            index="group",
+            vSize="value_NR",
+        title=" Sells Volume by Negative Service Review",
+        palette = "Set3"
+            )
+```
+
+
+
+```{r}
+# Create dataframe
+group <- c("Laptop","Netbook","Smartphone","PC")
+sells <- c(Laptop_vtas, Netbook_vtas, Smart_vtas, PC_vtas)
+value_PR <- c(L_PR, N_PR, S_PR, P_PR)
+value_NR <- c(L_NR, N_NR, S_NR, P_NR)
+
+data_SellsRev <- data.frame(group,value_PR, value_NR, sells)
+
+# load ggplot2
+library(ggplot2)
+ggplot(data_SellsRev, aes(x=value_PR, y=sells, color=group)) + geom_point(size=6) + 
+  ggtitle("Sells Volume by Positive Service Review") + xlab("Number of Positive reviews") + ylab("Volume of sells")
+
+ggplot(data_SellsRev, aes(x=value_NR, y=sells, color=group)) + geom_point(size=6) + 
+  ggtitle("Sells Volume by Negative Service Review") + xlab("Number of Negative Reviews") + ylab("Volume of sells")
+```
+
+
+
+
+### Volume of sells / Customer Review / Product_type
+
+```{r}
+L_CR4 <- sum(ExsProds_Laptop$x4StarReviews)
+L_CR3 <- sum(ExsProds_Laptop$x3StarReviews)
+L_CR2 <- sum(ExsProds_Laptop$x2StarReviews)
+L_CR1 <- sum(ExsProds_Laptop$x1StarReviews)
+
+N_CR4 <- sum(ExsProds_Netbook$x4StarReviews)
+N_CR3 <- sum(ExsProds_Netbook$x3StarReviews)
+N_CR2 <- sum(ExsProds_Netbook$x2StarReviews)
+N_CR1 <- sum(ExsProds_Netbook$x1StarReviews)
+
+P_CR4 <- sum(ExsProds_PC$x4StarReviews)
+P_CR3 <- sum(ExsProds_PC$x3StarReviews)
+P_CR2 <- sum(ExsProds_PC$x2StarReviews)
+P_CR1 <- sum(ExsProds_PC$x1StarReviews)
+
+S_CR4 <- sum(ExsProds_Smart$x4StarReviews)
+S_CR3 <- sum(ExsProds_Smart$x3StarReviews)
+S_CR2 <- sum(ExsProds_Smart$x2StarReviews)
+S_CR1 <- sum(ExsProds_Smart$x1StarReviews)
+
+
+data_CR <- as.matrix(data.frame(Smartphone = c(S_CR4, S_CR3, S_CR2, S_CR1),
+                                Laptop = c(L_CR4, L_CR3, L_CR2, L_CR1),         # Create matrix for stacked barchart
+                                Netbook = c(N_CR4, N_CR3, N_CR2, N_CR1),
+                                PC = c(P_CR4, P_CR3, P_CR2, P_CR1)))
+rownames(data_CR) <- c("x4 Star Reviews", "x3 Star Reviews", "x2 Star Reviews", "x1 Star Reviews")
+
+barplot(data_CR,                                         # Create stacked barchart
+        col = rainbow(4),
+        beside = TRUE, 
+        xlab = "Products of interest",
+        ylab = 'Number of Reviews',
+        main = "Number of reviews by product of Interest")
+
+legend("topright",                                    # Add legend to barplot
+       legend = c("x4 Star Reviews", "x3 Star Reviews", "x2 Star Reviews", "x1 Star Reviews"),
+       fill = rainbow(4))
+```
+
+
+> The info about sells is not subdivided by customer_review.
+
+
+# DUDAS
+
+- How to select the best algorithm?. RMSE ?. 
+- How to interpret the matrix that compare the models?.
+- Mentioned something about high precision is preferred on high sells... so it's possible to discard the negative values. how do I check that?.
+- To analyze the impact of service reviews and customer reviews, should I use... wich dataset, the full?.
+
+- if the correlation btw the products and the Volume in most of cases is very low... will the prediction be accurate enough?. How to test that?. 
+    > product type is a categorical feature, and correlation has sense only between numerical features.  
+
+- impossible to run the gradient Boost model. 
+    - try to remove some columns. 
+
+- why some models predict neg numbers and other positive?. 
+
+- how to add the restriction to 0+y
+
+
+- how to choose a variant of a Model?. 1) regression/classif.  then... Try/error?
+
+-  to improve the models keeping processing time into reasonable limits.. can I Train General > varImp() > reduce the dataset > Train again w hyperparams/more k-fold cross validation, etc... 
+
+
+- Normalization... how to handle the product number ot the dummy productTypes ?
+  - Answer, normalization only applies to numeric features.  ProductType is a categorical one. 
+
+
+
+
+
